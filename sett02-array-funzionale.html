@@ -1,0 +1,2580 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Settimana 2 — Oggetti, array e programmazione funzionale</title>
+<style>
+:root {
+  --ink: #12181F;
+  --ink-soft: #445366;
+  --ink-faint: #7A8899;
+  --ground: #F7F8FA;
+  --surface: #FFFFFF;
+  --surface-alt: #EDF1F5;
+  --line: #D6DEE7;
+  --deep: #1B3A5C;
+  --deep-soft: #E3ECF4;
+  --teal: #2A9D8F;
+  --teal-soft: #DCF0ED;
+  --amber: #C97F14;
+  --amber-soft: #FBEEDA;
+  --rose: #B4462F;
+  --rose-soft: #FAE6E1;
+  --violet: #6B4E9E;
+  --violet-soft: #EDE7F7;
+  --shadow: 0 1px 2px rgba(18,24,31,.06), 0 8px 24px rgba(18,24,31,.06);
+  --radius: 10px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ink: #E8EDF3;
+    --ink-soft: #A9B7C6;
+    --ink-faint: #74838F;
+    --ground: #0E1319;
+    --surface: #171E27;
+    --surface-alt: #1F2833;
+    --line: #2C3742;
+    --deep: #7FB3DC;
+    --deep-soft: #1A2C3D;
+    --teal: #4FC1B0;
+    --teal-soft: #16302D;
+    --amber: #E5A845;
+    --amber-soft: #33280F;
+    --rose: #E08872;
+    --rose-soft: #35201B;
+    --violet: #A98FD8;
+    --violet-soft: #241C33;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.3);
+  }
+}
+:root[data-theme="dark"] {
+  --ink: #E8EDF3;
+  --ink-soft: #A9B7C6;
+  --ink-faint: #74838F;
+  --ground: #0E1319;
+  --surface: #171E27;
+  --surface-alt: #1F2833;
+  --line: #2C3742;
+  --deep: #7FB3DC;
+  --deep-soft: #1A2C3D;
+  --teal: #4FC1B0;
+  --teal-soft: #16302D;
+  --amber: #E5A845;
+  --amber-soft: #33280F;
+  --rose: #E08872;
+  --rose-soft: #35201B;
+  --violet: #A98FD8;
+  --violet-soft: #241C33;
+  --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.3);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--ground);
+  color: var(--ink);
+  font-family: Georgia, "Iowan Old Style", "Palatino Linotype", serif;
+  font-size: 17px;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, .ui {
+  font-family: "Segoe UI", -apple-system, "Helvetica Neue", Arial, sans-serif;
+}
+
+code, .mono, pre, textarea {
+  font-family: "Cascadia Code", "Consolas", "SF Mono", monospace;
+  font-size: .92em;
+}
+
+/* ---------- LAYOUT ---------- */
+.wrap {
+  display: grid;
+  grid-template-columns: 270px minmax(0, 1fr);
+  min-height: 100vh;
+}
+
+/* ---------- SIDEBAR ---------- */
+.rail {
+  background: var(--surface);
+  border-right: 1px solid var(--line);
+  padding: 28px 0 40px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+}
+.rail-head {
+  padding: 0 24px 22px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 18px;
+}
+.rail-eyebrow {
+  font-family: "Segoe UI", sans-serif;
+  font-size: 11px;
+  letter-spacing: .13em;
+  text-transform: uppercase;
+  color: var(--teal);
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+.rail-title {
+  font-size: 19px;
+  font-weight: 650;
+  line-height: 1.25;
+  margin: 0;
+  letter-spacing: -.01em;
+}
+.rail-sub {
+  font-family: "Segoe UI", sans-serif;
+  font-size: 12.5px;
+  color: var(--ink-faint);
+  margin-top: 7px;
+}
+.rail nav { display: flex; flex-direction: column; gap: 2px; padding: 0 12px; }
+.rail-day {
+  font-family: "Segoe UI", sans-serif;
+  font-size: 10.5px;
+  letter-spacing: .11em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: var(--amber);
+  padding: 14px 12px 6px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+.rail-day::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--line);
+}
+.rail-day:first-child { padding-top: 2px; }
+.rail-btn {
+  display: grid;
+  grid-template-columns: 30px 1fr;
+  gap: 10px;
+  align-items: start;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: 0;
+  padding: 11px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  color: var(--ink-soft);
+  font-family: "Segoe UI", sans-serif;
+  font-size: 14px;
+  line-height: 1.35;
+  transition: background .15s, color .15s;
+}
+.rail-btn:hover { background: var(--surface-alt); color: var(--ink); }
+.rail-btn.on { background: var(--deep-soft); color: var(--deep); font-weight: 600; }
+.rail-num {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--ink-faint);
+  background: var(--surface-alt);
+  border-radius: 5px;
+  padding: 2px 0;
+  text-align: center;
+  letter-spacing: .02em;
+}
+.rail-btn.on .rail-num { background: var(--deep); color: #fff; }
+.rail-foot {
+  padding: 22px 24px 0;
+  margin-top: 20px;
+  border-top: 1px solid var(--line);
+  font-family: "Segoe UI", sans-serif;
+  font-size: 12px;
+  color: var(--ink-faint);
+  line-height: 1.5;
+}
+.home-link {
+  display: inline-block;
+  margin-bottom: 12px;
+  color: var(--teal);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 12.5px;
+}
+.home-link:hover { text-decoration: underline; }
+
+/* ---------- MAIN ---------- */
+.main { padding: 46px 56px 100px; max-width: 900px; }
+.pane { display: none; animation: fade .25s ease; }
+.pane.on { display: block; }
+@keyframes fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+.eyebrow {
+  font-family: "Segoe UI", sans-serif;
+  font-size: 11.5px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--teal);
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+h1 {
+  font-size: 33px;
+  line-height: 1.18;
+  margin: 0 0 14px;
+  letter-spacing: -.022em;
+  font-weight: 680;
+}
+h2 {
+  font-size: 22px;
+  margin: 44px 0 14px;
+  letter-spacing: -.014em;
+  font-weight: 650;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--line);
+}
+h3 {
+  font-size: 17px;
+  margin: 30px 0 10px;
+  font-weight: 650;
+  color: var(--deep);
+}
+p { margin: 0 0 15px; }
+.lead { font-size: 18.5px; color: var(--ink-soft); margin-bottom: 26px; line-height: 1.6; }
+ul, ol { margin: 0 0 16px; padding-left: 22px; }
+li { margin-bottom: 7px; }
+strong { font-weight: 700; }
+
+code {
+  background: var(--surface-alt);
+  padding: 1.5px 5px;
+  border-radius: 4px;
+  color: var(--deep);
+}
+
+pre {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--deep);
+  border-radius: var(--radius);
+  padding: 15px 18px;
+  overflow-x: auto;
+  margin: 0 0 18px;
+  line-height: 1.6;
+  font-size: 14px;
+}
+pre code { background: none; padding: 0; color: var(--ink); }
+
+/* ---------- BLOCCHI ---------- */
+.box {
+  border-radius: var(--radius);
+  padding: 17px 20px;
+  margin: 0 0 20px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+}
+.box-t {
+  font-family: "Segoe UI", sans-serif;
+  font-size: 11.5px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+.box p:last-child, .box ul:last-child, .box ol:last-child { margin-bottom: 0; }
+
+.warn { background: var(--rose-soft); border-color: var(--rose); }
+.warn .box-t { color: var(--rose); }
+.tip { background: var(--teal-soft); border-color: var(--teal); }
+.tip .box-t { color: var(--teal); }
+.note { background: var(--amber-soft); border-color: var(--amber); }
+.note .box-t { color: var(--amber); }
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0 0 20px;
+  font-size: 15px;
+  font-family: "Segoe UI", sans-serif;
+  background: var(--surface);
+  border-radius: var(--radius);
+  overflow: hidden;
+  border: 1px solid var(--line);
+}
+th {
+  background: var(--surface-alt);
+  text-align: left;
+  padding: 11px 14px;
+  font-weight: 650;
+  font-size: 13.5px;
+  border-bottom: 1px solid var(--line);
+}
+td { padding: 11px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+tr:last-child td { border-bottom: 0; }
+.tbl-scroll { overflow-x: auto; }
+
+/* ---------- CONSOLE ---------- */
+.lab {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin: 0 0 22px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+.lab-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: var(--surface-alt);
+  padding: 9px 14px;
+  border-bottom: 1px solid var(--line);
+  font-family: "Segoe UI", sans-serif;
+  font-size: 12px;
+  font-weight: 650;
+  color: var(--ink-soft);
+  letter-spacing: .03em;
+}
+.lab-acts { display: flex; gap: 7px; }
+.btn {
+  font-family: "Segoe UI", sans-serif;
+  font-size: 12.5px;
+  font-weight: 600;
+  padding: 5px 13px;
+  border-radius: 6px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: background .14s, color .14s, border-color .14s;
+}
+.btn:hover { background: var(--deep-soft); color: var(--deep); border-color: var(--deep); }
+.btn-run { background: var(--teal); border-color: var(--teal); color: #fff; }
+.btn-run:hover { background: var(--teal); border-color: var(--teal); color: #fff; filter: brightness(1.08); }
+.lab textarea {
+  width: 100%;
+  border: 0;
+  padding: 15px 18px;
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 14px;
+  line-height: 1.65;
+  resize: vertical;
+  min-height: 130px;
+  display: block;
+  outline: none;
+  tab-size: 2;
+}
+.lab-out {
+  border-top: 1px solid var(--line);
+  background: var(--surface-alt);
+  padding: 12px 18px;
+  font-family: "Cascadia Code", "Consolas", monospace;
+  font-size: 13.5px;
+  line-height: 1.6;
+  min-height: 44px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: var(--ink-soft);
+}
+.lab-out:empty::before {
+  content: "L'output comparirà qui.";
+  color: var(--ink-faint);
+  font-style: italic;
+}
+.lab-out .err { color: var(--rose); font-weight: 600; }
+.lab-out .ln { display: block; }
+
+/* ---------- ESERCIZI ---------- */
+.ex {
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--violet);
+  border-radius: var(--radius);
+  background: var(--surface);
+  padding: 18px 22px;
+  margin: 0 0 20px;
+}
+.ex-h {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.ex-n {
+  font-family: "Segoe UI", sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+  color: var(--violet);
+  background: var(--violet-soft);
+  padding: 3px 9px;
+  border-radius: 5px;
+  white-space: nowrap;
+}
+.ex-t {
+  font-family: "Segoe UI", sans-serif;
+  font-size: 16px;
+  font-weight: 650;
+  margin: 0;
+}
+.ex-lvl {
+  margin-left: auto;
+  font-family: "Segoe UI", sans-serif;
+  font-size: 11px;
+  color: var(--ink-faint);
+  letter-spacing: .05em;
+  white-space: nowrap;
+}
+.ex > p:last-child { margin-bottom: 0; }
+
+.reveal { margin-top: 12px; }
+.reveal-btn {
+  font-family: "Segoe UI", sans-serif;
+  font-size: 12.5px;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: 6px;
+  border: 1px solid var(--line);
+  background: var(--surface-alt);
+  color: var(--ink-soft);
+  cursor: pointer;
+  margin-right: 8px;
+  transition: background .14s, color .14s;
+}
+.reveal-btn:hover { background: var(--deep-soft); color: var(--deep); }
+.reveal-body {
+  display: none;
+  margin-top: 12px;
+  padding: 14px 17px;
+  background: var(--surface-alt);
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  font-size: 15.5px;
+}
+.reveal-body.open { display: block; }
+.reveal-body pre { margin-bottom: 0; background: var(--surface); }
+.reveal-body p:last-child { margin-bottom: 0; }
+
+/* ---------- CHECKLIST ---------- */
+.check { list-style: none; padding: 0; margin: 0 0 20px; }
+.check li {
+  display: flex;
+  gap: 11px;
+  align-items: flex-start;
+  padding: 11px 15px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  margin-bottom: 8px;
+  cursor: pointer;
+  font-family: "Segoe UI", sans-serif;
+  font-size: 15px;
+  transition: background .14s, border-color .14s;
+}
+.check li:hover { background: var(--surface-alt); }
+.check li.done { background: var(--teal-soft); border-color: var(--teal); }
+.check-mark {
+  width: 19px;
+  height: 19px;
+  border: 2px solid var(--line);
+  border-radius: 5px;
+  flex-shrink: 0;
+  margin-top: 2px;
+  position: relative;
+  transition: background .14s, border-color .14s;
+}
+.check li.done .check-mark { background: var(--teal); border-color: var(--teal); }
+.check li.done .check-mark::after {
+  content: "";
+  position: absolute;
+  left: 4.5px; top: 1px;
+  width: 5px; height: 9px;
+  border: solid #fff;
+  border-width: 0 2.5px 2.5px 0;
+  transform: rotate(43deg);
+}
+
+/* ---------- QUIZ ---------- */
+.q {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  padding: 18px 21px;
+  margin: 0 0 15px;
+}
+.q-t { font-family: "Segoe UI", sans-serif; font-size: 15.5px; font-weight: 600; margin-bottom: 13px; }
+.q-t code { font-size: .92em; }
+.opts { display: flex; flex-direction: column; gap: 7px; }
+.opt {
+  text-align: left;
+  font-family: "Segoe UI", sans-serif;
+  font-size: 14.5px;
+  padding: 10px 14px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--surface);
+  color: var(--ink);
+  cursor: pointer;
+  transition: background .14s, border-color .14s;
+  line-height: 1.45;
+}
+.opt:hover:not(:disabled) { background: var(--surface-alt); border-color: var(--deep); }
+.opt:disabled { cursor: default; }
+.opt.right { background: var(--teal-soft); border-color: var(--teal); font-weight: 600; }
+.opt.wrong { background: var(--rose-soft); border-color: var(--rose); }
+.fb {
+  margin-top: 12px;
+  padding: 11px 15px;
+  border-radius: 7px;
+  font-family: "Segoe UI", sans-serif;
+  font-size: 14px;
+  line-height: 1.55;
+  display: none;
+  background: var(--surface-alt);
+  border-left: 3px solid var(--deep);
+}
+.fb.show { display: block; }
+.fb code { font-size: .93em; }
+
+.score {
+  position: sticky;
+  bottom: 20px;
+  background: var(--deep);
+  color: #fff;
+  padding: 12px 22px;
+  border-radius: 30px;
+  font-family: "Segoe UI", sans-serif;
+  font-size: 14.5px;
+  font-weight: 650;
+  text-align: center;
+  box-shadow: 0 5px 20px rgba(0,0,0,.19);
+  margin-top: 26px;
+  display: inline-block;
+}
+
+/* ---------- MISC ---------- */
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  margin-bottom: 26px;
+}
+.chip {
+  font-family: "Segoe UI", sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 5px 12px;
+  border-radius: 20px;
+  background: var(--surface-alt);
+  color: var(--ink-soft);
+  border: 1px solid var(--line);
+}
+.chip-hi { background: var(--deep-soft); color: var(--deep); border-color: var(--deep); }
+
+.origin {
+  font-style: italic;
+  color: var(--ink-faint);
+  font-size: 14.5px;
+  border-left: 2px solid var(--line);
+  padding-left: 14px;
+  margin: 0 0 18px;
+  font-family: "Segoe UI", sans-serif;
+}
+
+.theme-tog {
+  position: fixed;
+  top: 18px;
+  right: 20px;
+  z-index: 40;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink-soft);
+  cursor: pointer;
+  font-size: 15px;
+  line-height: 1;
+  box-shadow: var(--shadow);
+}
+.theme-tog:hover { color: var(--deep); }
+
+@media (max-width: 880px) {
+  .wrap { grid-template-columns: 1fr; }
+  .rail { position: static; height: auto; }
+  .rail nav { flex-direction: row; flex-wrap: wrap; }
+  .rail-btn { width: auto; }
+  .main { padding: 32px 22px 80px; }
+  h1 { font-size: 27px; }
+}
+
+.firma-rail {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+  font-family: "Segoe UI", sans-serif;
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: var(--ink-faint);
+}
+.firma-rail b { color: var(--ink-soft); font-weight: 650; display: block; margin-bottom: 3px; }
+.firma-testa {
+  font-family: "Segoe UI", sans-serif;
+  font-size: 11px;
+  color: var(--ink-faint);
+  margin-top: 8px;
+  letter-spacing: .01em;
+}
+</style>
+</head>
+<body>
+
+<button class="theme-tog ui" id="themeTog" title="Cambia tema">◐</button>
+
+<div class="wrap">
+
+  <aside class="rail">
+    <div class="rail-head">
+      <div class="rail-eyebrow">Laboratorio · Settimana 2</div>
+      <h2 class="rail-title" style="border:0;padding:0;margin:0;">Oggetti, array e programmazione funzionale</h2>
+      <div class="rail-sub">map, filter, find, reduce</div>
+    <div class="firma-testa">Prof.ssa Paola Bertulli &middot; a.s. 2026/27</div>
+    </div>
+    <nav id="nav">
+      <div class="rail-day">Primo giorno · 2 ore</div>
+      <button class="rail-btn on" data-p="0"><span class="rail-num">00</span><span>Cosa impari oggi</span></button>
+      <button class="rail-btn" data-p="1"><span class="rail-num">01</span><span>Oggetti</span></button>
+      <button class="rail-btn" data-p="2"><span class="rail-num">02</span><span>Array di oggetti</span></button>
+      <button class="rail-btn" data-p="3"><span class="rail-num">03</span><span><code>map()</code></span></button>
+      <button class="rail-btn" data-p="4"><span class="rail-num">04</span><span><code>filter()</code> e <code>find()</code></span></button>
+      <button class="rail-btn" data-p="5"><span class="rail-num">05</span><span><code>reduce()</code></span></button>
+      <button class="rail-btn" data-p="6"><span class="rail-num">06</span><span>Officina · esercizi 1–4</span></button>
+      <div class="rail-day">Secondo giorno · 1 ora</div>
+      <button class="rail-btn" data-p="7"><span class="rail-num">07</span><span>Riscaldamento</span></button>
+      <button class="rail-btn" data-p="8"><span class="rail-num">08</span><span>Officina · esercizi 5–8</span></button>
+      <button class="rail-btn" data-p="9"><span class="rail-num">09</span><span>Errori tipici</span></button>
+      <button class="rail-btn" data-p="10"><span class="rail-num">10</span><span>Controlla di aver capito</span></button>
+    </nav>
+    <div class="rail-foot">
+      <a class="home-link" href="../index.html">&larr; Indice dell'anno</a>
+      <div>TPSIT · classe quinta<br>Rif. Pollini vol. 3, cap. 9.2 (pp. 269–278)</div>
+        <div class="firma-rail"><b>Prof.ssa Paola Bertulli</b>Materiale didattico originale. I rimandi al testo di A.&nbsp;Pollini, <em>Progettare per Innovare</em> vol.&nbsp;3, servono per ritrovare e approfondire gli argomenti sul libro.</div>
+</div>
+  </aside>
+
+  <main class="main">
+
+    <!-- ============ 0 ============ -->
+    <section class="pane on">
+      <div class="eyebrow">Settimana 2 · 3 ore di laboratorio</div>
+      <h1>Oggetti, array e programmazione funzionale</h1>
+      <p class="lead">La settimana più importante del trimestre. Al centro c'è un metodo solo, <code>map()</code>: senza quello React non si legge.</p>
+
+      <div class="meta">
+        <span class="chip chip-hi">La settimana chiave</span>
+        <span class="chip">8 esercizi</span>
+        <span class="chip">Console integrata</span>
+        <span class="chip">Pollini vol. 3, § 9.2</span>
+      </div>
+
+      <h2>Da dove riparti</h2>
+      <p>La settimana scorsa hai imparato che <strong>una funzione è un valore</strong>: si può assegnare a una costante e si può passare a un'altra funzione come argomento. L'esercizio 6 era esattamente quello.</p>
+      <p>Oggi quel meccanismo diventa lo strumento principale. <code>map</code>, <code>filter</code>, <code>find</code> e <code>reduce</code> sono metodi che ricevono una funzione e la applicano a ogni elemento di un array. Se ti è chiaro che <code>esegui(saluta)</code> non è <code>esegui(saluta())</code>, oggi hai già mezza strada fatta.</p>
+
+      <div class="lab">
+        <div class="lab-bar">
+          <span>Prima console: ripasso e assaggio</span>
+          <span class="lab-acts">
+            <button class="btn btn-run" data-run>Esegui ▸</button>
+            <button class="btn" data-reset>Ripristina</button>
+          </span>
+        </div>
+        <textarea spellcheck="false">const numeri = [1, 2, 3, 4, 5, 6]
+
+// la settimana scorsa avresti scritto una funzione e un ciclo
+const doppio = n =&gt; n * 2
+
+// oggi basta questa riga
+console.log(numeri.map(doppio))
+
+// e l'array di partenza non è cambiato
+console.log(numeri)</textarea>
+        <div class="lab-out"></div>
+      </div>
+
+      <p>Guarda bene la penultima riga: <code>numeri.map(doppio)</code>, senza parentesi dopo <code>doppio</code>. Stai passando la funzione, non il suo risultato. Sarà <code>map</code> a chiamarla, una volta per ogni numero.</p>
+
+      <h2>Imperativo e dichiarativo</h2>
+      <p>Il libro apre il paragrafo 9.2 (p. 269) con questa distinzione. Programmare in modo <strong>imperativo</strong> significa dire <em>come</em> fare una cosa, passo per passo. Programmare in modo <strong>dichiarativo</strong> significa dire <em>cosa</em> vuoi ottenere, e lasciare il come al linguaggio.</p>
+
+      <div class="tbl-scroll">
+      <table>
+        <tr><th style="width:50%">Imperativo · <em>come</em></th><th>Dichiarativo · <em>cosa</em></th></tr>
+        <tr>
+          <td><code>parti da un array vuoto, scorri con un indice da 0 a lunghezza, prendi l'elemento, moltiplicalo per 2, mettilo in fondo al nuovo array</code></td>
+          <td><code>numeri.map(n =&gt; n * 2)</code></td>
+        </tr>
+      </table>
+      </div>
+
+      <p>Fanno la stessa cosa. La seconda riga si legge in un secondo e non può contenere un errore di indice, perché di indici non ne ha.</p>
+
+      <h2>Che cosa sai fare a fine settimana</h2>
+      <ul>
+        <li>Creare oggetti, leggerne e modificarne le proprietà</li>
+        <li>Lavorare su un array di oggetti, che è la struttura dati di tutto l'anno</li>
+        <li>Difenderti da una proprietà mancante con <code>?.</code> e <code>??</code></li>
+        <li>Trasformare un array con <code>map()</code></li>
+        <li>Selezionare con <code>filter()</code> e cercare un singolo elemento con <code>find()</code></li>
+        <li>Ridurre un array a un solo valore con <code>reduce()</code></li>
+        <li>Concatenare più metodi in una sola espressione</li>
+      </ul>
+
+      <div class="box tip">
+        <div class="box-t">Perché questa settimana pesa più delle altre</div>
+        <p>Nella settimana 7 disegnerai liste di elementi in React. Il codice sarà una cosa del genere:</p>
+        <pre><code>{studenti.map(s =&gt; &lt;Riga key={s.id} nome={s.nome} /&gt;)}</code></pre>
+        <p>È <code>map</code>. Lo stesso <code>map</code> di oggi, che al posto di numeri produce pezzi di interfaccia. Se oggi non ti entra, in settimana 7 leggerai codice React senza capirlo.</p>
+      </div>
+    </section>
+
+    <!-- ============ 1 ============ -->
+    <section class="pane">
+      <div class="eyebrow">Sezione 01</div>
+      <h1>Oggetti</h1>
+      <p class="lead">Un contenitore di coppie nome-valore. Serve a tenere insieme i dati che descrivono una stessa cosa.</p>
+
+      <h2>L'oggetto letterale</h2>
+      <p>Un array raccoglie elementi dello stesso genere e li identifica con un numero. Un oggetto raccoglie proprietà diverse fra loro e le identifica con un nome.</p>
+
+      <pre><code>const utente = {
+  nome: "John",
+  eta: 30
+}</code></pre>
+
+      <p>Le graffe scritte così si chiamano <strong>oggetto letterale</strong>: stai scrivendo direttamente il valore, senza costruttori né classi. La chiave sta a sinistra dei due punti, il valore a destra, e le coppie si separano con la virgola.</p>
+
+      <p class="origin">Esempio ripreso dai materiali di laboratorio di Paola, <code>index02.js</code> (sezione Index.02 del repository "Pillole di JavaScript"). Il libro dà per acquisita la sintassi degli oggetti.</p>
+
+      <h2>Leggere e scrivere una proprietà</h2>
+      <p>Due notazioni: il <strong>punto</strong> e le <strong>parentesi quadre</strong>.</p>
+
+      <div class="lab">
+        <div class="lab-bar">
+          <span>Le due notazioni</span>
+          <span class="lab-acts">
+            <button class="btn btn-run" data-run>Esegui ▸</button>
+            <button class="btn" data-reset>Ripristina</button>
+          </span>
+        </div>
+        <textarea spellcheck="false">const utente = {
+  nome: "John",
+  eta: 30
+}
+
+console.log(utente.nome)      // notazione con il punto
+console.log(utente["nome"])   // notazione con le parentesi quadre
+
+// le quadre servono quando il nome della proprietà sta in una variabile
+const campo = "eta"
+console.log(utente[campo])</textarea>
+        <div class="lab-out"></div>
+      </div>
+
+      <div class="box tip">
+        <div class="box-t">Quale delle due usare</div>
+        <p>Il punto, quasi sempre: è più corto e più leggibile. Le quadre servono in due casi: quando il nome della proprietà è dentro una variabile, e quando il nome contiene caratteri che il punto non accetta, per esempio uno spazio o un trattino.</p>
+      </div>
+
+      <h2>Aggiungere e togliere proprietà</h2>
+      <p>Un oggetto JavaScript non ha uno schema fisso. Puoi aggiungere una proprietà che non esisteva, semplicemente assegnandola. E puoi rimuoverla con <code>delete</code>.</p>
+
+      <div class="lab">
+        <div class="lab-bar">
+          <span>Modifica, aggiunta, cancellazione</span>
+          <span class="lab-acts">
+            <button class="btn btn-run" data-run>Esegui ▸</button>
+            <button class="btn" data-reset>Ripristina</button>
+          </span>
+        </div>
+        <textarea spellcheck="false">const utente = { nome: "John", eta: 30 }
+
+utente.nome = "Pete"      // cambia il valore di una proprietà esistente
+utente.isAdmin = true     // ne aggiunge una nuova
+console.log(utente)
+
+delete utente.eta         // la rimuove
+console.log(utente)</textarea>
+        <div class="lab-out"></div>
+      </div>
+
+      <div class="box note">
+        <div class="box-t">Ma non era <code>const</code>?</div>
+        <p>Sì, ed è la stessa cosa vista la settimana scorsa con gli array. <code>const</code> vieta di riassegnare <code>utente</code> a un altro oggetto, non vieta di modificare l'interno dell'oggetto. Prova ad aggiungere <code>utente = {}</code> in fondo alla console qui sopra: quello sì che dà errore.</p>
+      </div>
+
+      <h2>Una proprietà che non c'è vale <code>undefined</code></h2>
+      <p>Questa è la caratteristica da ricordare. Se chiedi una proprietà che l'oggetto non ha, JavaScript <strong>non</strong> ti dà errore: ti restituisce <code>undefined</code>.</p>
+
+      <div class="lab">
+        <div class="lab-bar">
+          <span>Proprietà inesistente</span>
+          <span class="lab-acts">
+            <button class="btn btn-run" data-run>Esegui ▸</button>
+            <button class="btn" data-reset>Ripristina</button>
+          </span>
+        </div>
+        <textarea spellcheck="false">const utente = { nome: "Pete", isAdmin: true }
+
+console.log(utente.eta)        // undefined, nessun errore
+console.log(utente.indirizzo)  // undefined
+console.log(typeof utente.eta)</textarea>
+        <div class="lab-out"></div>
+      </div>
+
+      <div class="box warn">
+        <div class="box-t">Comodo e insidioso</div>
+        <p>È comodo perché puoi interrogare qualsiasi proprietà senza controlli. È insidioso perché un errore di battitura non si manifesta: se scrivi <code>utente.nomee</code> ottieni <code>undefined</code> e il programma prosegue, magari stampando "Benvenuto undefined" senza dirti dove hai sbagliato.</p>
+        <p>Quando un valore inatteso è <code>undefined</code>, il primo sospetto è sempre il nome della proprietà scritto male.</p>
+      </div>
+
+      <h2>Una funzione dentro un oggetto</h2>
+      <p>Il valore di una proprietà può essere qualsiasi cosa, funzioni comprese. Una funzione dentro un oggetto si chiama <strong>metodo</strong>. Dentro il metodo, <code>this</code> indica l'oggetto stesso.</p>
+
+      <div class="lab">
+        <div class="lab-bar">
+          <span>Un metodo</span>
+          <span class="lab-acts">
+            <button class="btn btn-run" data-run>Esegui ▸</button>
+            <button class="btn" data-reset>Ripristina</button>
+          </span>
+        </div>
+        <textarea spellcheck="false">const auto = {
+  marca: "Fiat",
+  modello: "Punto",
+  anno: 2012,
+  descrizione() {
+    return `Questa è una ${this.marca} ${this.modello} del ${this.anno}.`
+  }
+}
+
+console.log(auto.descrizione())</textarea>
+        <div class="lab-out"></div>
+      </div>
+
+      <p class="origin">L'oggetto <code>auto</code> con il metodo che si autodescrive viene dall'esercizio 1 dell'esercitazione di laboratorio di Paola (<code>esercitazione.md</code>), non dal libro.</p>
+
+      <p>Quando chiami <code>auto.descrizione()</code>, <code>this</code> vale <code>auto</code>. Nota le parentesi: senza, otterresti la funzione invece del suo risultato. Provalo togliendo le parentesi nella console qui sopra.</p>
+    </section>
+
+    <!-- ============ 2 ============ -->
+    <section class="pane">
+      <div class="eyebrow">Sezione 02</div>
+      <h1>Array di oggetti</h1>
+      <p class="lead">La struttura dati di tutto l'anno: una lista in cui ogni elemento è un oggetto con le stesse proprietà.</p>
+
+      <h2>Come si scrive</h2>
+      <p>Un array le cui caselle contengono oggetti. Nient'altro che la combinazione delle due cose che già conosci.</p>
+
+      <pre><code>const prodotti = [
+  { id: 1, nome: "Tastiera", prezzo: 45, disponibile: true },
+  { id: 2, nome: "Mouse", prezzo: 25, disponibile: false },
+  { id: 3, nome: "Monitor", prezzo: 180, disponibile: true }
+]</code></pre>
+
+      <p>Questa forma è ovunque: è come arriva una risposta da un'API REST, è come si tiene lo stato di un'applicazione, è come PocketBase ti restituirà i record nella settimana 5. Ogni riquadro che vedrai in una pagina web nasce quasi sempre da un elemento di un array come questo.</p>
+
+      <div class="lab">
+        <div class="lab-bar">
+          <span>Accedere ai dati</span>
+          <span class="lab-acts">
+            <button class="btn btn-run" data-run>Esegui ▸</button>
+            <button class="btn" data-reset>Ripristina</button>
+          </span>
+        </div>
+        <textarea spellcheck="false">const prodotti = [
+  { id: 1, nome: "Tastiera", prezzo: 45, disponibile: true },
+  { id: 2, nome: "Mouse", prezzo: 25, disponibile: false },
+  { id: 3, nome: "Monitor", prezzo: 180, disponibile: true }
+]
+
+console.log(prodotti.length)          // quanti elementi
+console.log(prodotti[0])              // il primo oggetto intero
+console.log(prodotti[0].nome)         // una proprietà del primo
+console.log(prodotti[2].prezzo)       // una proprietà del terzo</textarea>
+        <div class="lab-out"></div>
+      </div>
+
+      <p>Si legge da sinistra a destra: <code>prodotti[0]</code> è un oggetto, e su quell'oggetto puoi mettere il punto per prendere una proprietà.</p>
+
+      <h2>Il problema: quando la proprietà non c'è</h2>
+      <p>Nel mondo reale i dati sono irregolari. Un record può avere una proprietà che un altro non ha, e un dato che arriva da un server può mancare del tutto.</p>
+
+      <div class="lab">
+        <div class="lab-bar">
+          <span>Attenzione: questo va in errore</span>
+          <span class="lab-acts">
+            <button class="btn btn-run" data-run>Esegui ▸</button>
+            <button class="btn" data-reset>Ripristina</button>
+          </span>
+        </div>
+        <textarea spellcheck="false">const utente = {}   // un utente senza la proprietà "indirizzo"
+
+console.log(utente.indirizzo)          // undefined: nessun problema
+console.log(utente.indirizzo.via)      // TypeError!</textarea>
+        <div class="lab-out"></div>
+      </div>
+
+      <p>La prima riga funziona: chiedi una proprietà che non c'è e ottieni <code>undefined</code>. La seconda no: stai chiedendo la proprietà <code>via</code> di <code>undefined</code>, e <code>undefined</code> non ha proprietà. Il messaggio è <code>TypeError: Cannot read properties of undefined</code>.</p>
+
+      <h2>Concatenamento opzionale <code>?.</code></h2>
+      <p>L'operatore <code>?.</code> risolve esattamente questo. <code>valore?.prop</code> funziona come <code>valore.prop</code> se <code>valore</code> esiste; se invece è <code>null</code> o <code>undefined</code>, si ferma e restituisce <code>undefined</code> invece di lanciare l'errore.</p>
+
+      <div class="lab">
+        <div class="lab-bar">
+          <span>Tre modi di difendersi, uno solo buono</span>
+          <span class="lab-acts">
+            <button class="btn btn-run" data-run>Esegui ▸</button>
+            <button class="btn" data-reset>Ripristina</button>
+          </span>
+        </div>
+        <textarea spellcheck="false">const utente = {}
+
+// con il ternario
+console.log(utente.indirizzo ? utente.indirizzo.via : undefined)
+
+// con l'operatore logico &amp;&amp;
+console.log(utente.indirizzo &amp;&amp; utente.indirizzo.via)
+
+// con il concatenamento opzionale: la forma da usare
+console.log(utente.indirizzo?.via)</textarea>
+        <div class="lab-out"></div>
+      </div>
+
+      <p class="origin">Il confronto fra le tre soluzioni è ripreso da <code>index03.js</code> dei materiali di laboratorio di Paola (sezione Index.03). Nel libro <code>?.</code> e <code>??</code> non sono trattati.</p>
+
+      <h2>Coalescenza dei nulli <code>??</code></h2>
+      <p>Serve a dare un valore predefinito quando il dato manca. Somiglia a <code>||</code>, ma c'è una differenza che conta.</p>
+
+      <ul>
+        <li><code>a || b</code> restituisce <code>b</code> se <code>a</code> è un qualunque valore <em>falsy</em> — quindi anche se <code>a</code> è <code>0</code> o <code>""</code></li>
+        <li><code>a ?? b</code> restituisce <code>b</code> <strong>solo</strong> se <code>a</code> è <code>null</code> o <code>undefined</code></li>
+      </ul>
+
+      <div class="lab">
+        <div class="lab-bar">
+          <span>La differenza in sei righe</span>
+          <span class="lab-acts">
+            <button class="btn btn-run" data-run>Esegui ▸</button>
+            <button class="btn" data-reset>Ripristina</button>
+          </span>
+        </div>
+        <textarea spellcheck="false">console.log(null || 100)   // 100
+console.log(0 || 100)      // 100
+console.log("" || 100)     // 100
+
+console.log(null ?? 100)   // 100
+console.log(0 ?? 100)      // 0
+console.log("" ?? 100)     // ""</textarea>
+        <div class="lab-out"></div>
+      </div>
+
+      <div class="box warn">
+        <div class="box-t">Perché la differenza è seria</div>
+        <p>Immagina <code>const quantita = ordine.quantita || 1</code>. Se l'ordine ha davvero quantità <code>0</code>, con <code>||</code> diventa <code>1</code>: hai appena falsificato un dato. Con <code>??</code> resta <code>0</code>, che è la verità.</p>
+        <p>Vale per ogni numero che può legittimamente valere zero e per ogni stringa che può essere vuota: punteggi, contatori, note, giacenze.</p>
+      </div>
+
+      <h2>I due operatori insieme</h2>
+      <p>Si usano in coppia: <code>?.</code> attraversa la catena in sicurezza, <code>??</code> mette il valore di riserva se il risultato è mancante.</p>
+
+      <div class="lab">
+        <div class="lab-bar">
+          <span>La forma completa</span>
+          <span class="lab-acts">
+            <button class="btn btn-run" data-run>Esegui ▸</button>
+            <button class="btn" data-reset>Ripristina</button>
+          </span>
+        </div>
+        <textarea spellcheck="false">const auto = { marca: "Fiat", modello: "Punto", anno: 2012 }
+
+console.log(auto.proprietario?.nome ?? "Non ci sono dati sul proprietario")
+
+// ora aggiungiamo il proprietario
+auto.proprietario = { nome: "Paola" }
+
+console.log(auto.proprietario?.nome ?? "Non ci sono dati sul proprietario")</textarea>
+        <div class="lab-out"></div>
+      </div>
+
+      <p class="origin">Esempio adattato dall'esercizio 2 dell'esercitazione di laboratorio di Paola.</p>
+
+      <div class="box tip">
+        <div class="box-t">Dove ti servirà</div>
+        <p>Nella settimana 6 leggerai dati che arrivano da un server. Prima che la risposta arrivi, la variabile che li contiene è vuota: <code>dati?.risultati</code> evita che la pagina esploda nel frattempo. È uno degli usi più frequenti di <code>?.</code> in React.</p>
+      </div>
+    </section>
+
+    <!-- ============ 3 ============ -->
+    <section class="pane">
+      <div class="eyebrow">Sezione 03 · la più importante</div>
+      <h1><code>map()</code></h1>
+      <p class="lead">Un trasformatore. Prende un array, applica una funzione a ogni elemento, restituisce un nuovo array della stessa lunghezza.</p>
+
+      <div class="box tip">
+        <div class="box-t">Se oggi impari una cosa sola</div>
+        <p>Che sia questa. Il libro (§ 9.2, p. 269) chiama <code>map()</code> il <strong>trasformatore</strong> e ne dà due proprietà: restituisce un <strong>nuovo array della stessa lunghezza</strong> e lascia <strong>intatto l'originale</strong>. Sono le due cose da sapere a memoria.</p>
+      </div>
+
+      <h2>La forma</h2>
+      <pre><code>const nuovoArray = vecchioArray.map(funzione)</code></pre>
+
+      <p>La funzione che passi riceve un elemento e restituisce quello che quell'elemento deve diventare. <code>map</code> la chiama una volta per ogni casella e raccoglie i risultati in ordine.</p>
+
+      <div class="lab">
+        <div class="lab-bar">
+          <span>Il primo map</span>
+          <span class="lab-acts">
+            <button class="btn btn-run" data-run>Esegui ▸</button>
+            <button class="btn" data-reset>Ripristina</button>
+          </span>
+        </div>
+        <textarea spellcheck="false">const numeri = [1, 2, 3, 4, 5, 6]
+
+const quadrati = numeri.map(n =&gt; n * n)
+
+console.log(quadrati)
+console.log(numeri)   // guarda: intatto</textarea>
+        <div class="lab-out"></div>
+      </div>
+
+      <p class="origin">L'array <code>[1, 2, 3, 4, 5, 6]</code> con quadrati, pari e somma è l'esercizio 6 dell'esercitazione di laboratorio di Paola. Lo useremo come filo conduttore in tutte le sezioni.</p>
+
+      <h2>Sei uno a uno, mai uno a due</h2>
+      <p>Sei numeri entrano, sei quadrati escono. <code>map</code> non può saltare elementi e non può aggiungerne: la lunghezza del risultato è per costruzione uguale a quella di partenza.</p>
+
+      <div class="tbl-scroll">
+      <table>
+        <tr><th>Partenza</th><th>Funzione</th><th>Risultato</th></tr>
+        <tr><td><code>[1, 2, 3]</code></td><td><code>n =&gt; n * 2</code></td><td><code>[2, 4, 6]</code></td></tr>
+        <tr><td><code>[1, 2, 3]</code></td><td><code>n =&gt; n &gt; 1</code></td><td><code>[false, true, true]</code></td></tr>
+        <tr><td><code>["a", "b"]</code></td><td><code>s =&gt; s.toUpperCase()</code></td><td><code>["A", "B"]</code></td></tr>
+      </table>
+      </div>
+
+      <p>Il tipo può cambiare — nella seconda riga entrano numeri ed escono booleani — la quantità no.</p>
+
+      <div class="box warn">
+        <div class="box-t">Se vuoi meno elementi, <code>map</code> non è lo strumento</div>
+        <p>È l'errore numero uno con questo metodo: usarlo per selezionare. Se il tuo obiettivo è ottenere solo alcuni elementi, ti serve <code>filter()</code>, che vedrai nella sezione 04. <code>map</code> trasforma tutti, sempre.</p>
+      </div>
+
+      <h2>Immutabilità</h2>
+      <p><code>map()</code> non tocca l'array di partenza: ne costruisce uno nuovo. È quello che il libro chiama <strong>immutabilità</strong> (p. 269), e non è un dettaglio.</p>
+
+      <div class="lab">
+        <div class="lab-bar">
+          <span>Due strade, una sola sicura</span>
+          <span class="lab-acts">
+            <button class="btn btn-run" data-run>Esegui ▸</button>
+            <button class="btn" data-reset>Ripristina</button>
+          </span>
+        </div>
+        <textarea spellcheck="false">// strada 1: modifico l'originale (mutazione)
+const prezziA = [10, 20, 30]
+for (let i = 0; i &lt; prezziA.length; i++) {
+  prezziA[i] = prezziA[i] * 1.22
+}
+console.log("originale dopo il ciclo:", prezziA)
+
+// strada 2: ne costruisco uno nuovo (immutabilità)
+const prezziB = [10, 20, 30]
+const conIva = prezziB.map(p =&gt; p * 1.22)
+console.log("nuovo:", conIva)
+console.log("originale:", prezziB)</textarea>
+        <div class="lab-out"></div>
+      </div>
+
+      <p>Nella prima strada il dato di partenza è perso. Se più avanti ti serve il prezzo senza IVA, non ce l'hai più. Nella seconda hai entrambi.</p>
+
+      <div class="box note">
+        <div class="box-t">In React è obbligatorio</div>
+        <p>React capisce che deve ridisegnare l'interfaccia perché confronta il vecchio array con il nuovo. Se modifichi l'array esistente al suo posto, il vecchio e il nuovo <em>sono la stessa cosa</em>, React non vede differenze e la pagina non si aggiorna. È uno dei bug più comuni di chi inizia, e la causa è sempre una mutazione al posto di un <code>map</code>.</p>
+      </div>
+
+      <h2><code>map</code> su array di oggetti: la proiezione</h2>
+      <p>Qui <code>map</code> mostra la sua vera utilità. Da una lista di oggetti complessi puoi estrarre solo quello che ti serve. Il libro usa il termine <strong>proiezione</strong>, preso dall'algebra relazionale e da SQL: nella <code>SELECT nome FROM prodotti</code> stai proiettando la tabella su una sola colonna. È la stessa operazione.</p>
+
+      <div class="lab">
+        <div class="lab-bar">
+          <span>Proiezione su una proprietà</span>
+          <span class="lab-acts">
+            <button class="btn btn-run" data-run>Esegui ▸</button>
+            <button class="btn" data-reset>Ripristina</button>
+          </span>
+        </div>
+        <textarea spellcheck="false">const prodotti = [
+  { id: 1, nome: "Tastiera", prezzo: 45 },
+  { id: 2, nome: "Mouse", prezzo: 25 },
+  { id: 3, nome: "Monitor", prezzo: 180 }
+]
+
+const nomi = prodotti.map(p =&gt; p.nome)
+console.log(nomi)
+
+const prezzi = prodotti.map(p =&gt; p.prezzo)
+console.log(prezzi)</textarea>
+        <div class="lab-out"></div>
+      </div>
+
+      <p>La funzione <code>p =&gt; p.prezzo</code> è la forma tipica: un parametro, nessuna graffa, nessun <code>return</code>. Il libro la cita esplicitamente come esempio di arrow function senza <code>return</code> quando la logica è semplice.</p>
+
+      <h2>Proiettare su un nuovo oggetto</h2>
+      <p>Non sei costretto a restituire una proprietà: puoi restituire un oggetto costruito da te, con solo i campi che ti servono o con campi calcolati.</p>
+
+      <div class="lab">
+        <div class="lab-bar">
+          <span>Da tre campi a due, uno calcolato</span>
+          <span class="lab-acts">
+            <button class="btn btn-run" data-run>Esegui ▸</button>
+            <button class="btn" data-reset>Ripristina</button>
+          </span>
+        </div>
+        <textarea spellcheck="false">const prodotti = [
+  { id: 1, nome: "Tastiera", prezzo: 45 },
+  { id: 2, nome: "Mouse", prezzo: 25 },
+  { id: 3, nome: "Monitor", prezzo: 180 }
+]
+
+const listino = prodotti.map(p =&gt; ({
+  nome: p.nome,
+  prezzoIvato: p.prezzo * 1.22
+}))
+
+console.log(listino)</textarea>
+        <div class="lab-out"></div>
+      </div>
+
+      <div class="box warn">
+        <div class="box-t">Le parentesi tonde attorno alle graffe</div>
+        <p>Guarda bene: <code>p =&gt; ({ ... })</code>, non <code>p =&gt; { ... }</code>. Senza le tonde, JavaScript legge le graffe come il <em>corpo</em> della funzione e non come un oggetto, e la funzione restituisce <code>undefined</code>.</p>
+        <p>Le tonde dicono "questa è un'espressione, non un blocco". Provalo: togli le tonde nella console qui sopra ed esegui.</p>
+      </div>
+
+      <h2>Da <code>map</code> a stringhe</h2>
+      <p>La funzione può restituire qualsiasi cosa, anche una frase costruita con un template literal. Questo è il passo che porta dritto a React.</p>
+
+      <div class="lab">
+        <div class="lab-bar">
+          <span>Un array di frasi</span>
+          <span class="lab-acts">
+            <button class="btn btn-run" data-run>Esegui ▸</button>
+            <button class="btn" data-reset>Ripristina</button>
+          </span>
+        </div>
+        <textarea spellcheck="false">const prodotti = [
+  { id: 1, nome: "Tastiera", prezzo: 45 },
+  { id: 2, nome: "Mouse", prezzo: 25 },
+  { id: 3, nome: "Monitor", prezzo: 180 }
+]
+
+const righe = prodotti.map(p =&gt; `${p.nome}: ${p.prezzo} euro`)
+
+righe.forEach(r =&gt; console.log(r))</textarea>
+        <div class="lab-out"></div>
+      </div>
+
+      <p><code>forEach</code> è il cugino povero di <code>map</code>: scorre l'array ed esegue qualcosa per ogni elemento, ma <strong>non restituisce niente</strong>. Si usa quando vuoi un effetto (stampare, salvare), non un nuovo array. Se ti serve il risultato, usa <code>map</code>.</p>
+
+      <h2>Il secondo parametro: l'indice</h2>
+      <p>La funzione passata a <code>map</code> può ricevere un secondo parametro: la posizione dell'elemento, contata da 0.</p>
+
+      <div class="lab">
+        <div class="lab-bar">
+          <span>Elemento e indice</span>
+          <span class="lab-acts">
+            <button class="btn btn-run" data-run>Esegui ▸</button>
+            <button class="btn" data-reset>Ripristina</button>
+          </span>
+        </div>
+        <textarea spellcheck="false">const podio = ["Sara", "Luca", "Anna"]
+
+const classifica = podio.map((nome, i) =&gt; `${i + 1}. ${nome}`)
+
+console.log(classifica)</textarea>
+        <div class="lab-out"></div>
+      </div>
+
+      <h2>Dove finisce tutto questo: React</h2>
+      <p>Nella settimana 7 disegnerai una lista di prodotti in React. Il codice sarà questo:</p>
+
+      <pre><code>&lt;ul&gt;
+  {prodotti.map(p =&gt; (
+    &lt;li key={p.id}&gt;{p.nome} — {p.prezzo} euro&lt;/li&gt;
+  ))}
+&lt;/ul&gt;</code></pre>
+
+      <p>Confrontalo con la console di due riquadri fa. È identico: <code>prodotti.map(p =&gt; ...)</code>, con le tonde attorno al valore restituito, e dentro un template al posto della stringa. Cambia solo che il risultato non è testo ma un pezzo di interfaccia.</p>
+
+      <div class="box note">
+        <div class="box-t">Quel <code>key</code></div>
+        <p>L'attributo <code>key={p.id}</code> serve a React per riconoscere quale riga è quale quando la lista cambia: se ne cancelli una, React deve sapere quale togliere senza ridisegnare tutte le altre. Deve essere un valore unico e stabile, e per questo si usa l'<code>id</code> del record, mai la posizione nell'array.</p>
+        <p>Non serve che tu lo capisca a fondo adesso. Serve che quando lo vedrai in settimana 7 tu riconosca il <code>map</code> sotto.</p>
+      </div>
+    </section>
+
+    <!-- ============ 4 ============ -->
+    <section class="pane">
+      <div class="eyebrow">Sezione 04</div>
+      <h1><code>filter()</code> e <code>find()</code></h1>
+      <p class="lead">Il setaccio e il primo riscontro. Si somigliano, restituiscono cose diverse, e confonderli costa ore.</p>
+
+      <h2><code>filter()</code>: il setaccio</h2>
+      <p>Il libro (§ 9.2, p. 269) lo chiama <strong>setaccio</strong>. Scorre l'array, tiene solo gli elementi per cui la funzione restituisce <code>true</code>, e ne costruisce uno nuovo.</p>
+
+      <p>La funzione che passi a <code>filter</code> si chiama <strong>predicato</strong>: deve restituire un booleano, vero o falso. Non trasforma niente, decide soltanto se tenere o scartare.</p>
+
+      <div class="lab">
+        <div class="lab-bar">
+          <span>Il setaccio</span>
+          <span class="lab-acts">
+            <button class="btn btn-run" data-run>Esegui ▸</button>
+            <button class="btn" data-reset>Ripristina</button>
+          </span>
+        </div>
+        <textarea spellcheck="false">const numeri = [1, 2, 3, 4, 5, 6]
+
+const pari = numeri.filter(n =&gt; n % 2 === 0)
+
+console.log(pari)
+console.log(numeri)   // intatto anche qui</textarea>
+        <div class="lab-out"></div>
+      </div>
+
+      <div class="tbl-scroll">
+      <table>
+        <tr><th style="width:22%">Metodo</th><th>La funzione restituisce</th><th>Il metodo restituisce</th></tr>
+        <tr><td><code>map()</code></td><td>Il nuovo valore dell'elemento</td><td>Un array della <strong>stessa</strong> lunghezza</td></tr>
+        <tr><td><code>filter()</code></td><td><code>true</code> o <code>false</code></td><td>Un array più corto o uguale</td></tr>
+      </table>
+      </div>
+
+      <div class="lab">
+        <div class="lab-bar">
+          <span>filter su oggetti</span>
+          <span class="lab-acts">
+            <button class="btn btn-run" data-run>Esegui ▸</button>
+            <button class="btn" data-reset>Ripristina</button>
+          </span>
+        </div>
+        <textarea spellcheck="false">const prodotti = [
+  { id: 1, nome: "Tastiera", prezzo: 45, disponibile: true },
+  { id: 2, nome: "Mouse", prezzo: 25, disponibile: false },
+  { id: 3, nome: "Monitor", prezzo: 180, disponibile: true }
+]
+
+console.log(prodotti.filter(p =&gt; p.prezzo &lt; 50))
+console.log(prodotti.filter(p =&gt; p.disponibile))
+console.log(prodotti.filter(p =&gt; p.prezzo &gt; 1000))   // nessuno</textarea>
+        <div class="lab-out"></div>
+      </div>
+
+      <p>L'ultima riga è il caso da tenere a mente: nessun prodotto soddisfa la condizione, e <code>filter</code> restituisce <strong>un array vuoto</strong>. Non <code>null</code>, non <code>undefined</code>: <code>[]</code>.</p>
+
+      <h2>La trappola dell'array vuoto</h2>
+      <p>Te l'avevo annunciata la settimana scorsa: un array vuoto è <strong>truthy</strong>. Non è nella lista dei sei valori falsy, quindi in un <code>if</code> è vero.</p>
+
+      <div class="lab">
+        <div class="lab-bar">
+          <span>Il bug e la sua correzione</span>
+          <span class="lab-acts">
+            <button class="btn btn-run" data-run>Esegui ▸</button>
+            <button class="btn" data-reset>Ripristina</button>
+          </span>
+        </div>
+        <textarea spellcheck="false">const prodotti = [
+  { nome: "Tastiera", prezzo: 45 },
+  { nome: "Mouse", prezzo: 25 }
+]
+
+const risultati = prodotti.filter(p =&gt; p.prezzo &gt; 1000)
+
+// SBAGLIATO
+if (risultati) {
+  console.log("Trovati " + risultati.length + " prodotti")
+}
+
+// CORRETTO
+if (risultati.length &gt; 0) {
+  console.log("Trovati " + risultati.length + " prodotti")
+} else {
+  console.log("Nessun prodotto trovato")
+}</textarea>
+        <div class="lab-out"></div>
+      </div>
+
+      <div class="box warn">
+        <div class="box-t">La regola</div>
+        <p>Dopo un <code>filter</code> non si scrive mai <code>if (risultati)</code>. Si scrive <code>if (risultati.length &gt; 0)</code>. Il libro lo segnala esplicitamente a p. 269.</p>
+        <p>Il bug è cattivo perché la pagina non va in errore: mostra semplicemente "Trovati 0 prodotti" o una lista vuota dove ti aspettavi un messaggio.</p>
+      </div>
+
+      <h2><code>find()</code>: il primo riscontro</h2>
+      <p>Stessa firma di <code>filter</code>, un predicato che restituisce vero o falso. Ma <code>find</code> si ferma al <strong>primo</strong> elemento che soddisfa la condizione e restituisce <strong>quell'oggetto</strong>, non un array.</p>
+
+      <div class="lab">
+        <div class="lab-bar">
+          <span>find contro filter</span>
+          <span class="lab-acts">
+            <button class="btn btn-run" data-run>Esegui ▸</button>
+            <button class="btn" data-reset>Ripristina</button>
+          </span>
+        </div>
+        <textarea spellcheck="false">const prodotti = [
+  { id: 1, nome: "Tastiera", prezzo: 45 },
+  { id: 2, nome: "Mouse", prezzo: 25 },
+  { id: 3, nome: "Monitor", prezzo: 180 }
+]
+
+const conFilter = prodotti.filter(p =&gt; p.id === 2)
+const conFind = prodotti.find(p =&gt; p.id === 2)
+
+console.log(conFilter)          // un array con dentro un oggetto
+console.log(conFind)            // l'oggetto
+
+console.log(conFilter.nome)     // undefined: un array non ha "nome"
+console.log(conFind.nome)       // Mouse</textarea>
+        <div class="lab-out"></div>
+      </div>
+
+      <p>Le ultime due righe sono la fonte di metà degli errori su questi metodi. Con <code>filter</code> devi scrivere <code>conFilter[0].nome</code>; con <code>find</code> il punto lo metti direttamente.</p>
+
+      <div class="box tip">
+        <div class="box-t">Quale usare</div>
+        <p>Quando cerchi per un identificatore unico — un <code>id</code>, un codice, una matricola — usa <code>find()</code>. È semanticamente corretto: sai già che il risultato è uno solo, e prendere un array da un solo elemento è una complicazione inutile. Il libro lo dice a p. 269.</p>
+        <p>Quando ti aspetti più risultati, usa <code>filter()</code>.</p>
+      </div>
+
+      <div class="box warn">
+        <div class="box-t"><code>find</code> quando non trova</div>
+        <p>Restituisce <code>undefined</code>. Quindi <code>prodotti.find(p =&gt; p.id === 99).nome</code> lancia <code>TypeError: Cannot read properties of undefined</code>: è la stessa scena della sezione 02.</p>
+        <p>La difesa la conosci già: <code>prodotti.find(p =&gt; p.id === 99)?.nome ?? "non trovato"</code>.</p>
+      </div>
+
+      <div class="lab">
+        <div class="lab-bar">
+          <span>find che non trova, e la difesa</span>
+          <span class="lab-acts">
+            <button class="btn btn-run" data-run>Esegui ▸</button>
+            <button class="btn" data-reset>Ripristina</button>
+          </span>
+        </div>
+        <textarea spellcheck="false">const prodotti = [
+  { id: 1, nome: "Tastiera" },
+  { id: 2, nome: "Mouse" }
+]
+
+console.log(prodotti.find(p =&gt; p.id === 99))
+
+console.log(prodotti.find(p =&gt; p.id === 99)?.nome ?? "non trovato")
+
+// e questa invece esplode: togli il commento e provala
+// console.log(prodotti.find(p =&gt; p.id === 99).nome)</textarea>
+        <div class="lab-out"></div>
+      </div>
+
+      <h2>Due parenti utili: <code>some()</code> e <code>every()</code></h2>
+      <p>Stesso schema, ma restituiscono un booleano. <code>some</code> risponde "almeno uno?", <code>every</code> risponde "tutti?".</p>
+
+      <div class="lab">
+        <div class="lab-bar">
+          <span>some ed every</span>
+          <span class="lab-acts">
+            <button class="btn btn-run" data-run>Esegui ▸</button>
+            <button class="btn" data-reset>Ripristina</button>
+          </span>
+        </div>
+        <textarea spellcheck="false">const numeri = [1, 2, 3, 4, 5, 6]
+
+console.log(numeri.some(n =&gt; n &gt; 4))    // almeno uno maggiore di 4?
+console.log(numeri.every(n =&gt; n &lt; 10))  // tutti minori di 10?
+console.log(numeri.every(n =&gt; n &gt; 2))   // tutti maggiori di 2?</textarea>
+        <div class="lab-out"></div>
+      </div>
+
+      <p class="origin">Gli esempi con <code>some()</code> ed <code>every()</code> vengono dall'esercizio 6 dell'esercitazione di laboratorio di Paola (sezione Index.08 del repository). Il libro tratta solo <code>map</code>, <code>filter</code>, <code>find</code> e <code>reduce</code>.</p>
+    </section>
+
+    <!-- ============ 5 ============ -->
+    <section class="pane">
+      <div class="eyebrow">Sezione 05</div>
+      <h1><code>reduce()</code></h1>
+      <p class="lead">Da un array a un solo valore. È il più potente dei quattro ed è quello che spaventa: ci arriviamo per gradi.</p>
+
+      <h2>Il problema</h2>
+      <p>Hai un array di numeri e vuoi la somma. Non un array: <em>un numero</em>. Né <code>map</code> né <code>filter</code> sanno farlo, perché entrambi restituiscono array.</p>
+
+      <p>Il libro (§ 9.2, p. 269) chiama <code>reduce()</code> il metodo di <strong>sintesi</strong> e usa l'immagine della <strong>palla di neve</strong>: un accumulatore che rotola lungo l'array e a ogni elemento cresce.</p>
+
+      <h2>La forma</h2>
+      <pre><code>array.reduce((accumulatore, elemento) =&gt; nuovoAccumulatore, valoreIniziale)</code></pre>
+
+      <p>Due cose da passare: una funzione con <strong>due</strong> parametri e un <strong>valore iniziale</strong>. La funzione riceve la palla di neve com'è adesso e l'elemento corrente, e restituisce la palla aggiornata.</p>
+
+      <div class="lab">
+        <div class="lab-bar">
+          <span>La somma, passo per passo</span>
+          <span class="lab-acts">
+            <button class="btn btn-run" data-run>Esegui ▸</button>
+            <button class="btn" data-reset>Ripristina</button>
+          </span>
+        </div>
+        <textarea spellcheck="false">const numeri = [1, 2, 3, 4, 5, 6]
+
+const somma = numeri.reduce((acc, n) =&gt; {
+  console.log(`acc vale ${acc}, arriva ${n}, diventa ${acc + n}`)
+  return acc + n
+}, 0)
+
+console.log("totale:", somma)</textarea>
+        <div class="lab-out"></div>
+      </div>
+
+      <p>Leggi le righe stampate una per una: è tutto il meccanismo. L'accumulatore parte da <code>0</code>, che è il valore iniziale, e a ogni giro diventa il valore restituito dal giro precedente.</p>
+
+      <div class="tbl-scroll">
+      <table>
+        <tr><th>Giro</th><th><code>acc</code> in ingresso</th><th><code>n</code></th><th><code>acc</code> restituito</th></tr>
+        <tr><td>iniziale</td><td>—</td><td>—</td><td>0</td></tr>
+        <tr><td>1</td><td>0</td><td>1</td><td>1</td></tr>
+        <tr><td>2</td><td>1</td><td>2</td><td>3</td></tr>
+        <tr><td>3</td><td>3</td><td>3</td><td>6</td></tr>
+        <tr><td>4</td><td>6</td><td>4</td><td>10</td></tr>
+        <tr><td>5</td><td>10</td><td>5</td><td>15</td></tr>
+        <tr><td>6</td><td>15</td><td>6</td><td>21</td></tr>
+      </table>
+      </div>
+
+      <div class="box warn">
+        <div class="box-t">Il valore iniziale va scritto sempre</div>
+        <p>Il libro insiste su questo punto: l'accumulatore va <strong>sempre dichiarato esplicitamente</strong>. Tecnicamente puoi ometterlo, e allora <code>reduce</code> usa il primo elemento come accumulatore di partenza. Ma con un array vuoto quel comportamento lancia un <code>TypeError</code>, e con un array di oggetti dà risultati assurdi.</p>
+        <p>Costa due caratteri: scrivi la virgola e il valore iniziale.</p>
+      </div>
+
+      <div class="lab">
+        <div class="lab-bar">
+          <span>Cosa succede senza valore iniziale</span>
+          <span class="lab-acts">
+            <button class="btn btn-run" data-run>Esegui ▸</button>
+            <button class="btn" data-reset>Ripristina</button>
+          </span>
+        </div>
+        <textarea spellcheck="false">const vuoto = []
+
+console.log(vuoto.reduce((acc, n) =&gt; acc + n, 0))   // 0, corretto
+
+// senza il valore iniziale:
+console.log(vuoto.reduce((acc, n) =&gt; acc + n))      // TypeError</textarea>
+        <div class="lab-out"></div>
+      </div>
+
+      <h2>Il valore iniziale decide il tipo del risultato</h2>
+      <p>Se parti da <code>0</code>, il risultato è un numero. Se parti da <code>""</code>, è una stringa. Se parti da <code>[]</code>, è un array. Se parti da <code>{}</code>, è un oggetto.</p>
+
+      <div class="lab">
+        <div class="lab-bar">
+          <span>Quattro reduce, quattro tipi</span>
+          <span class="lab-acts">
+            <button class="btn btn-run" data-run>Esegui ▸</button>
+            <button class="btn" data-reset>Ripristina</button>
+          </span>
+        </div>
+        <textarea spellcheck="false">const parole = ["ciao", "come", "va"]
+
+// verso una stringa
+console.log(parole.reduce((acc, p) =&gt; acc + p + " ", ""))
+
+// verso un numero: la lunghezza totale
+console.log(parole.reduce((acc, p) =&gt; acc + p.length, 0))
+
+// verso un numero: il massimo
+const numeri = [4, 9, 2, 7]
+console.log(numeri.reduce((max, n) =&gt; n &gt; max ? n : max, numeri[0]))</textarea>
+        <div class="lab-out"></div>
+      </div>
+
+      <h2><code>reduce</code> su array di oggetti</h2>
+      <p>L'uso più frequente nella pratica: totali, medie, conteggi.</p>
+
+      <div class="lab">
+        <div class="lab-bar">
+          <span>Totale di un carrello</span>
+          <span class="lab-acts">
+            <button class="btn btn-run" data-run>Esegui ▸</button>
+            <button class="btn" data-reset>Ripristina</button>
+          </span>
+        </div>
+        <textarea spellcheck="false">const carrello = [
+  { nome: "Tastiera", prezzo: 45, quantita: 2 },
+  { nome: "Mouse", prezzo: 25, quantita: 1 },
+  { nome: "Monitor", prezzo: 180, quantita: 1 }
+]
+
+const totale = carrello.reduce((acc, r) =&gt; acc + r.prezzo * r.quantita, 0)
+
+console.log(`Totale carrello: ${totale} euro`)
+
+const pezzi = carrello.reduce((acc, r) =&gt; acc + r.quantita, 0)
+console.log(`Articoli: ${pezzi}`)</textarea>
+        <div class="lab-out"></div>
+      </div>
+
+      <h2>Perché il libro lo chiama "il padre di tutti"</h2>
+      <p>Con un accumulatore che parte da <code>[]</code>, <code>reduce</code> può simulare sia <code>map</code> sia <code>filter</code>. Non è un modo di scrivere codice: è un modo di capire che i tre metodi sono la stessa idea applicata in modi diversi.</p>
+
+      <div class="lab">
+        <div class="lab-bar">
+          <span>map e filter riscritti con reduce</span>
+          <span class="lab-acts">
+            <button class="btn btn-run" data-run>Esegui ▸</button>
+            <button class="btn" data-reset>Ripristina</button>
+          </span>
+        </div>
+        <textarea spellcheck="false">const numeri = [1, 2, 3, 4, 5, 6]
+
+// map fatto con reduce
+const doppi = numeri.reduce((acc, n) =&gt; [...acc, n * 2], [])
+console.log(doppi)
+
+// filter fatto con reduce
+const pari = numeri.reduce((acc, n) =&gt; n % 2 === 0 ? [...acc, n] : acc, [])
+console.log(pari)</textarea>
+        <div class="lab-out"></div>
+      </div>
+
+      <p>I tre puntini <code>...</code> sono l'<strong>operatore spread</strong>: <code>[...acc, x]</code> costruisce un nuovo array con dentro tutto il contenuto di <code>acc</code> più <code>x</code>. Ancora immutabilità: non modifichi <code>acc</code>, ne fai uno nuovo.</p>
+
+      <div class="box tip">
+        <div class="box-t">Nella pratica</div>
+        <p>Nel codice vero scrivi <code>map</code> quando trasformi e <code>filter</code> quando selezioni: si leggono meglio. <code>reduce</code> lo tieni per quando devi arrivare a un valore singolo — un totale, una media, un conteggio, un raggruppamento.</p>
+      </div>
+    </section>
+
+    <!-- ============ 6 ============ -->
+    <section class="pane">
+      <div class="eyebrow">Sezione 06 · primo giorno</div>
+      <h1>Officina · esercizi 1–4</h1>
+      <p class="lead">Da qui lavori tu. Ogni esercizio ha un aiuto e una soluzione: l'aiuto ti dà la direzione, la soluzione il codice. Apri il secondo solo dopo aver provato davvero.</p>
+
+      <div class="box note">
+        <div class="box-t">Come si lavora</div>
+        <p>Scrivi nel riquadro dell'esercizio ed esegui. Se il risultato non torna, leggi il messaggio di errore prima di tutto: dice quasi sempre dove guardare.</p>
+        <p>Oggi arrivi fino all'esercizio 4. Gli altri quattro sono nella sezione 08. Se finisci prima, vai avanti.</p>
+      </div>
+
+      <!-- ES 1 -->
+      <div class="ex">
+        <div class="ex-h">
+          <span class="ex-n">Es 1</span>
+          <p class="ex-t">L'oggetto auto</p>
+          <span class="ex-lvl">base</span>
+        </div>
+        <p>Crea un oggetto <code>auto</code> con le proprietà <code>marca</code> uguale a <code>"Fiat"</code>, <code>modello</code> uguale a <code>"Punto"</code> e <code>anno</code> uguale a <code>2012</code>.</p>
+        <p>Aggiungi un metodo <code>descrizione()</code> che restituisce la frase <code>Questa è una Fiat Punto del 2012.</code> costruita con un template literal e con <code>this</code>.</p>
+        <p>Poi aggiungi la proprietà <code>colore</code> dopo aver creato l'oggetto, ed elimina <code>anno</code> con <code>delete</code>. Stampa l'oggetto dopo ogni modifica.</p>
+
+        <div class="lab">
+          <div class="lab-bar">
+            <span>Il tuo codice</span>
+            <span class="lab-acts">
+              <button class="btn btn-run" data-run>Esegui ▸</button>
+              <button class="btn" data-reset>Ripristina</button>
+            </span>
+          </div>
+          <textarea spellcheck="false">// crea qui l'oggetto auto
+
+
+// chiama il metodo, poi aggiungi e togli proprietà
+</textarea>
+          <div class="lab-out"></div>
+        </div>
+
+        <div class="reveal">
+          <button class="reveal-btn">Aiuto</button>
+          <button class="reveal-btn">Soluzione</button>
+          <div class="reveal-body">
+            <p>Il metodo si scrive dentro le graffe come una qualsiasi proprietà, ma con la sintassi breve <code>nome() { ... }</code>. Dentro, per leggere le altre proprietà dello stesso oggetto, usa <code>this.</code> seguito dal nome.</p>
+            <p>Per aggiungere una proprietà dopo, basta assegnarla: <code>auto.colore = ...</code>. Per toglierla, <code>delete auto.anno</code>.</p>
+          </div>
+          <div class="reveal-body">
+<pre><code>const auto = {
+  marca: "Fiat",
+  modello: "Punto",
+  anno: 2012,
+  descrizione() {
+    return `Questa è una ${this.marca} ${this.modello} del ${this.anno}.`
+  }
+}
+
+console.log(auto.descrizione())
+
+auto.colore = "rosso"
+console.log(auto)
+
+delete auto.anno
+console.log(auto)
+console.log(auto.anno)   // undefined</code></pre>
+            <p>Nota l'ultima riga: dopo <code>delete</code> la proprietà non c'è più, ma chiederla non dà errore. Restituisce <code>undefined</code>.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ES 2 -->
+      <div class="ex">
+        <div class="ex-h">
+          <span class="ex-n">Es 2</span>
+          <p class="ex-t">Proprietario mancante</p>
+          <span class="ex-lvl">base</span>
+        </div>
+        <p>Partendo dall'oggetto <code>auto</code> dell'esercizio 1, che non ha la proprietà <code>proprietario</code>, stampa il nome del proprietario. Se non c'è, deve comparire <code>Non ci sono dati sul proprietario</code>.</p>
+        <p>Usa <code>?.</code> per attraversare la catena e <code>??</code> per il valore di riserva. Poi aggiungi davvero il proprietario e riesegui la stessa riga: deve stampare il nome.</p>
+
+        <div class="lab">
+          <div class="lab-bar">
+            <span>Il tuo codice</span>
+            <span class="lab-acts">
+              <button class="btn btn-run" data-run>Esegui ▸</button>
+              <button class="btn" data-reset>Ripristina</button>
+            </span>
+          </div>
+          <textarea spellcheck="false">const auto = { marca: "Fiat", modello: "Punto", anno: 2012 }
+
+</textarea>
+          <div class="lab-out"></div>
+        </div>
+
+        <div class="reveal">
+          <button class="reveal-btn">Aiuto</button>
+          <button class="reveal-btn">Soluzione</button>
+          <div class="reveal-body">
+            <p>La catena da attraversare è <code>auto</code> → <code>proprietario</code> → <code>nome</code>. Il punto interrogativo va messo dove la catena può interrompersi, cioè dopo <code>proprietario</code>.</p>
+            <p>Attenzione a non usare <code>||</code> al posto di <code>??</code>: qui il risultato sarebbe uguale, ma prendi subito l'abitudine giusta.</p>
+          </div>
+          <div class="reveal-body">
+<pre><code>const auto = { marca: "Fiat", modello: "Punto", anno: 2012 }
+
+console.log(auto.proprietario?.nome ?? "Non ci sono dati sul proprietario")
+
+auto.proprietario = { nome: "Paola" }
+
+console.log(auto.proprietario?.nome ?? "Non ci sono dati sul proprietario")
+
+const chi = auto.proprietario?.nome ?? "Sconosciuto"
+console.log(`Il proprietario è: ${chi}`)</code></pre>
+            <p>Senza <code>?.</code> la prima riga darebbe <code>TypeError: Cannot read properties of undefined</code>. Provalo: togli il punto interrogativo ed esegui.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ES 3 -->
+      <div class="ex">
+        <div class="ex-h">
+          <span class="ex-n">Es 3</span>
+          <p class="ex-t">Quadrati e pari</p>
+          <span class="ex-lvl">base</span>
+        </div>
+        <p>Dato l'array <code>numeri = [1, 2, 3, 4, 5, 6]</code>:</p>
+        <ul>
+          <li>con <code>map()</code> costruisci l'array dei quadrati</li>
+          <li>con <code>filter()</code> costruisci l'array dei soli numeri pari</li>
+          <li>con <code>reduce()</code> calcola la somma di tutti i numeri</li>
+        </ul>
+        <p>Stampa i tre risultati e, alla fine, stampa <code>numeri</code>: deve essere ancora quello di partenza.</p>
+
+        <div class="lab">
+          <div class="lab-bar">
+            <span>Il tuo codice</span>
+            <span class="lab-acts">
+              <button class="btn btn-run" data-run>Esegui ▸</button>
+              <button class="btn" data-reset>Ripristina</button>
+            </span>
+          </div>
+          <textarea spellcheck="false">const numeri = [1, 2, 3, 4, 5, 6]
+
+</textarea>
+          <div class="lab-out"></div>
+        </div>
+
+        <div class="reveal">
+          <button class="reveal-btn">Aiuto</button>
+          <button class="reveal-btn">Soluzione</button>
+          <div class="reveal-body">
+            <p>Tutte e tre le funzioni sono arrow function di una riga, senza graffe e senza <code>return</code>.</p>
+            <p>Per i pari, il resto della divisione per 2: <code>n % 2 === 0</code>. Per la somma, ricordati il valore iniziale <code>0</code> dopo la funzione, separato da una virgola.</p>
+          </div>
+          <div class="reveal-body">
+<pre><code>const numeri = [1, 2, 3, 4, 5, 6]
+
+const quadrati = numeri.map(n =&gt; n * n)
+console.log(quadrati)          // [1, 4, 9, 16, 25, 36]
+
+const pari = numeri.filter(n =&gt; n % 2 === 0)
+console.log(pari)              // [2, 4, 6]
+
+const somma = numeri.reduce((acc, n) =&gt; acc + n, 0)
+console.log(somma)             // 21
+
+console.log(numeri)            // [1, 2, 3, 4, 5, 6]: intatto</code></pre>
+            <p>Nessuno dei tre metodi ha toccato <code>numeri</code>. È l'immutabilità di cui parla il libro a p. 269.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ES 4 -->
+      <div class="ex">
+        <div class="ex-h">
+          <span class="ex-n">Es 4</span>
+          <p class="ex-t">Il listino</p>
+          <span class="ex-lvl">intermedio</span>
+        </div>
+        <p>Dato l'array di prodotti qui sotto, produci con <code>map()</code>:</p>
+        <ul>
+          <li>l'array dei soli nomi</li>
+          <li>l'array delle frasi <code>Tastiera costa 45 euro</code>, una per prodotto</li>
+          <li>un nuovo array di oggetti con solo <code>nome</code> e <code>prezzoIvato</code>, dove l'IVA è al 22%</li>
+        </ul>
+
+        <div class="lab">
+          <div class="lab-bar">
+            <span>Il tuo codice</span>
+            <span class="lab-acts">
+              <button class="btn btn-run" data-run>Esegui ▸</button>
+              <button class="btn" data-reset>Ripristina</button>
+            </span>
+          </div>
+          <textarea spellcheck="false">const prodotti = [
+  { id: 1, nome: "Tastiera", prezzo: 45 },
+  { id: 2, nome: "Mouse", prezzo: 25 },
+  { id: 3, nome: "Monitor", prezzo: 180 }
+]
+
+</textarea>
+          <div class="lab-out"></div>
+        </div>
+
+        <div class="reveal">
+          <button class="reveal-btn">Aiuto</button>
+          <button class="reveal-btn">Soluzione</button>
+          <div class="reveal-body">
+            <p>I primi due punti sono <code>map</code> normali: la funzione restituisce una proprietà nel primo caso, un template literal nel secondo.</p>
+            <p>Il terzo è quello con la trappola: se la funzione deve restituire un oggetto letterale, devi racchiuderlo fra parentesi tonde, altrimenti le graffe vengono lette come corpo della funzione.</p>
+          </div>
+          <div class="reveal-body">
+<pre><code>const prodotti = [
+  { id: 1, nome: "Tastiera", prezzo: 45 },
+  { id: 2, nome: "Mouse", prezzo: 25 },
+  { id: 3, nome: "Monitor", prezzo: 180 }
+]
+
+const nomi = prodotti.map(p =&gt; p.nome)
+console.log(nomi)
+
+const frasi = prodotti.map(p =&gt; `${p.nome} costa ${p.prezzo} euro`)
+console.log(frasi)
+
+const listino = prodotti.map(p =&gt; ({
+  nome: p.nome,
+  prezzoIvato: p.prezzo * 1.22
+}))
+console.log(listino)</code></pre>
+            <p>Il primo <code>map</code> è la <strong>proiezione</strong> di cui parla il libro: da oggetti complessi tieni una sola colonna, come una <code>SELECT nome</code> in SQL.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="box tip">
+        <div class="box-t">Fine delle due ore</div>
+        <p>Gli esercizi 5–8 sono nella sezione 08, dopo il riscaldamento. Se ti avanza tempo puoi andare avanti: nessuno te lo vieta.</p>
+        <p>Prima di chiudere, rileggi la sezione 03. Se <code>map</code> non ti è chiaro, il resto della settimana non regge.</p>
+      </div>
+    </section>
+
+    <!-- ============ 7 ============ -->
+    <section class="pane">
+      <div class="eyebrow">Sezione 07 · secondo giorno</div>
+      <h1>Riscaldamento</h1>
+      <p class="lead">Quindici minuti per riattivare quello che hai fatto l'altro giorno. Tre micro-attività da cinque minuti l'una: un errore da trovare, un codice da completare, un risultato da prevedere.</p>
+
+      <h2>Uno · trova l'errore</h2>
+      <p>Questo codice dovrebbe stampare un array di tre oggetti con la sola proprietà <code>nome</code>. Stampa invece tre <code>undefined</code>. Correggilo.</p>
+
+      <div class="lab">
+        <div class="lab-bar">
+          <span>Correggi ed esegui</span>
+          <span class="lab-acts">
+            <button class="btn btn-run" data-run>Esegui ▸</button>
+            <button class="btn" data-reset>Ripristina</button>
+          </span>
+        </div>
+        <textarea spellcheck="false">const prodotti = [
+  { nome: "Tastiera", prezzo: 45 },
+  { nome: "Mouse", prezzo: 25 },
+  { nome: "Monitor", prezzo: 180 }
+]
+
+const listino = prodotti.map(p =&gt; { nome: p.nome })
+
+console.log(listino)</textarea>
+        <div class="lab-out"></div>
+      </div>
+
+      <div class="reveal">
+        <button class="reveal-btn">Aiuto</button>
+        <button class="reveal-btn">Soluzione</button>
+        <div class="reveal-body">
+          <p>Guarda le graffe dopo la freccia. JavaScript non sta leggendo un oggetto.</p>
+        </div>
+        <div class="reveal-body">
+          <p>Le graffe vengono interpretate come corpo della funzione, non come oggetto letterale: la funzione non restituisce niente. Servono le parentesi tonde attorno:</p>
+<pre><code>const listino = prodotti.map(p =&gt; ({ nome: p.nome }))</code></pre>
+          <p>In alternativa, apri il blocco e scrivi il <code>return</code>:</p>
+<pre><code>const listino = prodotti.map(p =&gt; {
+  return { nome: p.nome }
+})</code></pre>
+          <p>Curiosità utile: con <strong>due</strong> proprietà lo stesso errore non dà <code>undefined</code> ma un <code>SyntaxError</code>, perché la virgola dentro un blocco di istruzioni non ha senso. Provalo aggiungendo <code>, prezzoIvato: p.prezzo * 1.22</code> nel riquadro qui sopra.</p>
+        </div>
+      </div>
+
+      <h2>Due · completa</h2>
+      <p>Completa le tre righe mancanti. La prima deve dare l'array dei nomi, la seconda i soli prodotti sotto i 100 euro, la terza il prodotto con <code>id</code> uguale a 2.</p>
+
+      <div class="lab">
+        <div class="lab-bar">
+          <span>Completa ed esegui</span>
+          <span class="lab-acts">
+            <button class="btn btn-run" data-run>Esegui ▸</button>
+            <button class="btn" data-reset>Ripristina</button>
+          </span>
+        </div>
+        <textarea spellcheck="false">const prodotti = [
+  { id: 1, nome: "Tastiera", prezzo: 45 },
+  { id: 2, nome: "Mouse", prezzo: 25 },
+  { id: 3, nome: "Monitor", prezzo: 180 }
+]
+
+const nomi = prodotti.
+const economici = prodotti.
+const cercato = prodotti.
+
+console.log(nomi)
+console.log(economici)
+console.log(cercato.nome)</textarea>
+        <div class="lab-out"></div>
+      </div>
+
+      <div class="reveal">
+        <button class="reveal-btn">Aiuto</button>
+        <button class="reveal-btn">Soluzione</button>
+        <div class="reveal-body">
+          <p>Tre metodi diversi, uno per riga. L'ultima riga della console fa <code>cercato.nome</code> con il punto diretto: questo ti dice che <code>cercato</code> deve essere un oggetto, non un array.</p>
+        </div>
+        <div class="reveal-body">
+<pre><code>const nomi = prodotti.map(p =&gt; p.nome)
+const economici = prodotti.filter(p =&gt; p.prezzo &lt; 100)
+const cercato = prodotti.find(p =&gt; p.id === 2)</code></pre>
+          <p>Se avessi usato <code>filter</code> nell'ultima riga, <code>cercato.nome</code> darebbe <code>undefined</code>: un array non ha la proprietà <code>nome</code>. Avresti dovuto scrivere <code>cercato[0].nome</code>.</p>
+        </div>
+      </div>
+
+      <h2>Tre · prevedi il risultato</h2>
+      <p>Prima di eseguire, scrivi su un foglio cosa stampa ognuna di queste righe. Poi esegui e confronta.</p>
+
+      <div class="lab">
+        <div class="lab-bar">
+          <span>Prima prevedi, poi esegui</span>
+          <span class="lab-acts">
+            <button class="btn btn-run" data-run>Esegui ▸</button>
+            <button class="btn" data-reset>Ripristina</button>
+          </span>
+        </div>
+        <textarea spellcheck="false">const numeri = [1, 2, 3]
+
+console.log(numeri.map(n =&gt; n &gt; 1))
+console.log(numeri.filter(n =&gt; n &gt; 5))
+console.log(numeri.find(n =&gt; n &gt; 5))
+console.log(numeri.filter(n =&gt; n &gt; 5).length)
+console.log(numeri.reduce((acc, n) =&gt; acc + n, 100))</textarea>
+        <div class="lab-out"></div>
+      </div>
+
+      <div class="box note">
+        <div class="box-t">Le risposte, se ne hai sbagliata qualcuna</div>
+        <ul>
+          <li><code>[false, true, true]</code> — <code>map</code> restituisce sempre tre elementi, qui booleani</li>
+          <li><code>[]</code> — <code>filter</code> senza riscontri restituisce un array vuoto</li>
+          <li><code>undefined</code> — <code>find</code> senza riscontri restituisce <code>undefined</code>, non <code>[]</code></li>
+          <li><code>0</code> — la lunghezza dell'array vuoto, ed è il modo corretto di verificare "non ho trovato niente"</li>
+          <li><code>106</code> — l'accumulatore parte da 100, non da 0</li>
+        </ul>
+        <p>Se hai sbagliato la seconda o la terza, rileggi la sezione 04 prima di andare avanti.</p>
+      </div>
+    </section>
+
+    <!-- ============ 8 ============ -->
+    <section class="pane">
+      <div class="eyebrow">Sezione 08 · secondo giorno</div>
+      <h1>Officina · esercizi 5–8</h1>
+      <p class="lead">Gli ultimi quattro. Il settimo introduce il concatenamento, l'ottavo mette insieme tutto quello che hai fatto in questa settimana.</p>
+
+      <!-- ES 5 -->
+      <div class="ex">
+        <div class="ex-h">
+          <span class="ex-n">Es 5</span>
+          <p class="ex-t">Cercare per id</p>
+          <span class="ex-lvl">base</span>
+        </div>
+        <p>Dato l'array di prodotti, scrivi una funzione <code>cercaPerId(lista, id)</code> che restituisce il <strong>nome</strong> del prodotto con quell'id.</p>
+        <p>Se l'id non esiste, la funzione deve restituire <code>"prodotto non trovato"</code> invece di andare in errore. Provala con 2 e con 99.</p>
+
+        <div class="lab">
+          <div class="lab-bar">
+            <span>Il tuo codice</span>
+            <span class="lab-acts">
+              <button class="btn btn-run" data-run>Esegui ▸</button>
+              <button class="btn" data-reset>Ripristina</button>
+            </span>
+          </div>
+          <textarea spellcheck="false">const prodotti = [
+  { id: 1, nome: "Tastiera", prezzo: 45 },
+  { id: 2, nome: "Mouse", prezzo: 25 },
+  { id: 3, nome: "Monitor", prezzo: 180 }
+]
+
+</textarea>
+          <div class="lab-out"></div>
+        </div>
+
+        <div class="reveal">
+          <button class="reveal-btn">Aiuto</button>
+          <button class="reveal-btn">Soluzione</button>
+          <div class="reveal-body">
+            <p>Cerchi per identificatore unico, quindi il metodo giusto è <code>find</code>, non <code>filter</code>.</p>
+            <p>Per il caso "non trovato" hai già gli strumenti: <code>find</code> restituisce <code>undefined</code>, e <code>?.</code> con <code>??</code> gestiscono esattamente questa situazione.</p>
+          </div>
+          <div class="reveal-body">
+<pre><code>const cercaPerId = (lista, id) =&gt;
+  lista.find(p =&gt; p.id === id)?.nome ?? "prodotto non trovato"
+
+console.log(cercaPerId(prodotti, 2))    // Mouse
+console.log(cercaPerId(prodotti, 99))   // prodotto non trovato</code></pre>
+            <p>Si legge da sinistra: cerca l'elemento, se c'è prendi <code>nome</code>, se il risultato manca usa la frase di riserva. Tre operatori in una riga, ognuno con un compito preciso.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ES 6 -->
+      <div class="ex">
+        <div class="ex-h">
+          <span class="ex-n">Es 6</span>
+          <p class="ex-t">Statistiche di magazzino</p>
+          <span class="ex-lvl">intermedio</span>
+        </div>
+        <p>Sullo stesso array di prodotti, con <code>giacenza</code> aggiunta, calcola e stampa:</p>
+        <ul>
+          <li>il valore totale del magazzino, cioè la somma di <code>prezzo × giacenza</code></li>
+          <li>il prezzo medio dei prodotti</li>
+          <li>il prodotto più caro</li>
+        </ul>
+        <p>Usa <code>reduce()</code> per tutti e tre.</p>
+
+        <div class="lab">
+          <div class="lab-bar">
+            <span>Il tuo codice</span>
+            <span class="lab-acts">
+              <button class="btn btn-run" data-run>Esegui ▸</button>
+              <button class="btn" data-reset>Ripristina</button>
+            </span>
+          </div>
+          <textarea spellcheck="false">const prodotti = [
+  { id: 1, nome: "Tastiera", prezzo: 45, giacenza: 10 },
+  { id: 2, nome: "Mouse", prezzo: 25, giacenza: 4 },
+  { id: 3, nome: "Monitor", prezzo: 180, giacenza: 2 }
+]
+
+</textarea>
+          <div class="lab-out"></div>
+        </div>
+
+        <div class="reveal">
+          <button class="reveal-btn">Aiuto</button>
+          <button class="reveal-btn">Soluzione</button>
+          <div class="reveal-body">
+            <p>Per il totale, l'accumulatore parte da <code>0</code> e a ogni giro cresce del prodotto fra prezzo e giacenza.</p>
+            <p>Per la media, calcola prima la somma dei prezzi con lo stesso schema, poi dividi per <code>prodotti.length</code>. Non esiste un metodo <code>media()</code>.</p>
+            <p>Per il più caro, l'accumulatore non è un numero ma un <strong>oggetto</strong>: a ogni giro tieni quello con il prezzo maggiore. Il valore iniziale può essere <code>prodotti[0]</code>.</p>
+          </div>
+          <div class="reveal-body">
+<pre><code>const valore = prodotti.reduce((acc, p) =&gt; acc + p.prezzo * p.giacenza, 0)
+console.log(`Valore magazzino: ${valore} euro`)
+
+const sommaPrezzi = prodotti.reduce((acc, p) =&gt; acc + p.prezzo, 0)
+const media = sommaPrezzi / prodotti.length
+console.log(`Prezzo medio: ${media} euro`)
+
+const piuCaro = prodotti.reduce(
+  (max, p) =&gt; p.prezzo &gt; max.prezzo ? p : max,
+  prodotti[0]
+)
+console.log(`Il più caro: ${piuCaro.nome}`)</code></pre>
+            <p>Il terzo è il salto concettuale: l'accumulatore può essere di qualsiasi tipo, oggetti compresi. Il valore iniziale <code>prodotti[0]</code> non è casuale — partire da <code>{}</code> darebbe <code>undefined</code> al primo confronto.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ES 7 -->
+      <div class="ex">
+        <div class="ex-h">
+          <span class="ex-n">Es 7</span>
+          <p class="ex-t">Concatenamento</p>
+          <span class="ex-lvl">avanzato</span>
+        </div>
+        <p>I metodi si concatenano: <code>filter()</code> restituisce un array, e su un array puoi chiamare <code>map()</code>. Si scrive <code>lista.filter(...).map(...)</code>.</p>
+        <p>Dall'array di prodotti, ottieni in <strong>una sola espressione</strong> l'array dei nomi dei soli prodotti disponibili che costano meno di 100 euro.</p>
+        <p>Poi prova a invertire l'ordine, scrivendo <code>.map().filter()</code>, e osserva cosa succede.</p>
+
+        <div class="lab">
+          <div class="lab-bar">
+            <span>Il tuo codice</span>
+            <span class="lab-acts">
+              <button class="btn btn-run" data-run>Esegui ▸</button>
+              <button class="btn" data-reset>Ripristina</button>
+            </span>
+          </div>
+          <textarea spellcheck="false">const prodotti = [
+  { id: 1, nome: "Tastiera", prezzo: 45, disponibile: true },
+  { id: 2, nome: "Mouse", prezzo: 25, disponibile: false },
+  { id: 3, nome: "Monitor", prezzo: 180, disponibile: true },
+  { id: 4, nome: "Webcam", prezzo: 60, disponibile: true }
+]
+
+</textarea>
+          <div class="lab-out"></div>
+        </div>
+
+        <div class="reveal">
+          <button class="reveal-btn">Aiuto</button>
+          <button class="reveal-btn">Soluzione</button>
+          <div class="reveal-body">
+            <p>L'ordine conta: prima riduci la lista, poi trasforma quello che resta. Se prima trasformi in nomi, ti restano solo stringhe e il prezzo non c'è più.</p>
+            <p>Le due condizioni del filtro si uniscono con <code>&amp;&amp;</code>. Per la disponibilità non serve <code>=== true</code>: la proprietà è già un booleano.</p>
+          </div>
+          <div class="reveal-body">
+<pre><code>const risultato = prodotti
+  .filter(p =&gt; p.disponibile &amp;&amp; p.prezzo &lt; 100)
+  .map(p =&gt; p.nome)
+
+console.log(risultato)   // ["Tastiera", "Webcam"]</code></pre>
+            <p>Andando a capo prima di ogni punto la catena si legge come un elenco di passaggi: <em>prendi i prodotti, tieni quelli disponibili sotto i 100, estrai i nomi</em>.</p>
+            <p>Invertendo l'ordine, <code>.map(p =&gt; p.nome)</code> produce un array di stringhe e il <code>filter</code> successivo non trova né <code>disponibile</code> né <code>prezzo</code>: entrambe le proprietà valgono <code>undefined</code>, il predicato è sempre falso, il risultato è <code>[]</code>.</p>
+            <p>Regola pratica: <strong>filtra prima, trasforma dopo</strong>. Fra l'altro è anche più efficiente, perché trasformi meno elementi.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ES 8 -->
+      <div class="ex">
+        <div class="ex-h">
+          <span class="ex-n">Es 8</span>
+          <p class="ex-t">Il registro dei voti</p>
+          <span class="ex-lvl">sfida</span>
+        </div>
+        <p>Dato un array di studenti, dove ogni studente ha un <code>nome</code> e un array <code>voti</code>, scrivi una funzione <code>iBravi(lista)</code> che restituisce l'array dei <strong>nomi</strong> di chi ha una media dei voti superiore a 8.</p>
+        <p>Ti servono tutti e tre i metodi: <code>reduce</code> per la media di ciascuno, <code>filter</code> per selezionare, <code>map</code> per tenere solo i nomi.</p>
+        <p>Con i dati dell'esempio il risultato deve essere <code>["Sara"]</code>.</p>
+
+        <div class="lab">
+          <div class="lab-bar">
+            <span>Il tuo codice</span>
+            <span class="lab-acts">
+              <button class="btn btn-run" data-run>Esegui ▸</button>
+              <button class="btn" data-reset>Ripristina</button>
+            </span>
+          </div>
+          <textarea spellcheck="false">const studenti = [
+  { nome: "Luca", voti: [9, 8, 7] },
+  { nome: "Marco", voti: [6, 5, 4] },
+  { nome: "Sara", voti: [10, 9, 9] }
+]
+
+</textarea>
+          <div class="lab-out"></div>
+        </div>
+
+        <div class="reveal">
+          <button class="reveal-btn">Aiuto</button>
+          <button class="reveal-btn">Soluzione</button>
+          <div class="reveal-body">
+            <p>Spezza il problema. Scrivi prima una funzione a parte, <code>media(voti)</code>, che riceve un array di numeri e restituisce la media: è <code>reduce</code> diviso <code>length</code>. Provala da sola prima di andare avanti.</p>
+            <p>Poi la catena diventa leggibile: filtra gli studenti la cui <code>media(s.voti)</code> supera 8, e mappa il risultato sui nomi.</p>
+            <p>Attenzione: qui ci sono due array annidati. <code>studenti</code> è l'array esterno, <code>s.voti</code> è un array dentro ogni elemento.</p>
+          </div>
+          <div class="reveal-body">
+            <p>Versione leggibile, con la media estratta in una funzione a parte:</p>
+<pre><code>const media = voti =&gt; voti.reduce((acc, v) =&gt; acc + v, 0) / voti.length
+
+const iBravi = lista =&gt; lista
+  .filter(s =&gt; media(s.voti) &gt; 8)
+  .map(s =&gt; s.nome)
+
+console.log(iBravi(studenti))   // ["Sara"]</code></pre>
+            <p>Versione compatta, tutto in una catena:</p>
+<pre><code>const iBravi = lista =&gt; lista
+  .filter(s =&gt; (s.voti.reduce((acc, v) =&gt; acc + v, 0) / s.voti.length) &gt; 8)
+  .map(s =&gt; s.nome)</code></pre>
+            <p>Funzionano allo stesso modo, ma la prima si legge. Estrarre <code>media</code> in una funzione con un nome è quello che farai sempre nel codice vero: funzioni piccole che si compongono, come nell'esercizio 7 della settimana scorsa.</p>
+          </div>
+        </div>
+      </div>
+
+      <p class="origin">Gli esercizi 3 e 8 riprendono gli esercizi 6 e 7 dell'esercitazione di laboratorio di Paola. Il libro propone esercizi analoghi sugli stessi metodi: 9.2 conversione prezzi con <code>map</code>, 9.3 filtro delle temperature sopra i 30 gradi, 9.4 voto massimo con <code>reduce</code> (p. 278).</p>
+
+      <div class="box tip">
+        <div class="box-t">Se hai finito tutto</div>
+        <p>Estendi l'esercizio 8: fai restituire un array di oggetti <code>{ nome, media }</code> invece dei soli nomi, ordinato dalla media più alta alla più bassa. Per l'ordinamento serve <code>sort()</code>, che non abbiamo visto: cercalo. Attenzione, <code>sort()</code> è l'eccezione fra i metodi di array — modifica l'array originale invece di crearne uno nuovo.</p>
+      </div>
+    </section>
+
+    <!-- ============ 9 ============ -->
+    <section class="pane">
+      <div class="eyebrow">Sezione 09</div>
+      <h1>Errori tipici</h1>
+      <p class="lead">I messaggi che vedrai più spesso questa settimana, e dove guardare per correggerli.</p>
+
+      <div class="tbl-scroll">
+      <table>
+        <tr><th style="width:40%">Messaggio o sintomo</th><th>Cosa è successo</th></tr>
+        <tr>
+          <td><code>TypeError: Cannot read properties of undefined (reading 'x')</code></td>
+          <td>Stai mettendo il punto su qualcosa che non esiste. Le cause tipiche: un <code>find()</code> che non ha trovato niente, una proprietà annidata che manca, un nome scritto male. La difesa è <code>?.</code>.</td>
+        </tr>
+        <tr>
+          <td><code>TypeError: x.map is not a function</code></td>
+          <td><code>x</code> non è un array. Spesso è un oggetto singolo, oppure è <code>undefined</code> perché i dati non sono ancora arrivati. Controlla con <code>console.log(x)</code> cosa contiene davvero.</td>
+        </tr>
+        <tr>
+          <td><code>TypeError: Reduce of empty array with no initial value</code></td>
+          <td>Hai chiamato <code>reduce()</code> su un array vuoto senza valore iniziale. Aggiungi la virgola e il valore iniziale: <code>reduce(fn, 0)</code>.</td>
+        </tr>
+        <tr>
+          <td><code>map</code> restituisce un array di <code>undefined</code></td>
+          <td>Hai aperto le graffe nella arrow function e non hai scritto <code>return</code>. Oppure stai restituendo un oggetto letterale senza le tonde attorno: <code>p =&gt; ({ ... })</code>.</td>
+        </tr>
+        <tr>
+          <td>Il risultato è <code>undefined</code> invece dell'oggetto cercato</td>
+          <td>Hai usato <code>filter()</code> dove serviva <code>find()</code>. <code>filter</code> restituisce un array: la proprietà va letta con <code>risultato[0].nome</code>, oppure passa a <code>find</code>.</td>
+        </tr>
+        <tr>
+          <td>Il ramo "nessun risultato" non viene mai eseguito</td>
+          <td>Stai controllando con <code>if (risultati)</code>. Un array vuoto è truthy. Usa <code>if (risultati.length &gt; 0)</code>.</td>
+        </tr>
+        <tr>
+          <td>L'array originale è cambiato e non doveva</td>
+          <td>Hai usato un ciclo che assegna sulle caselle, oppure <code>sort()</code> o <code>push()</code>. <code>map</code> e <code>filter</code> non modificano mai l'originale; <code>sort</code> e <code>push</code> sì.</td>
+        </tr>
+        <tr>
+          <td>Il valore predefinito compare anche quando il dato c'è</td>
+          <td>Hai usato <code>||</code> al posto di <code>??</code> su un valore che può essere <code>0</code> o <code>""</code>. Con <code>||</code> anche lo zero legittimo viene sostituito.</td>
+        </tr>
+      </table>
+      </div>
+
+      <div class="box tip">
+        <div class="box-t">Come si indaga</div>
+        <p>Quando una catena di metodi non dà il risultato atteso, spezzala. Assegna ogni passaggio a una costante e stampala:</p>
+        <pre><code>const filtrati = prodotti.filter(p =&gt; p.prezzo &lt; 100)
+console.log(filtrati)                  // è quello che ti aspetti?
+const nomi = filtrati.map(p =&gt; p.nome)
+console.log(nomi)</code></pre>
+        <p>In due minuti sai qual è il passaggio che sbaglia. Ricomporrai la catena dopo.</p>
+      </div>
+
+      <h2>Metti alla prova</h2>
+      <p>Ognuno di questi blocchi contiene un errore. Eseguili uno alla volta — commenta gli altri con <code>//</code> — e leggi il messaggio.</p>
+
+      <div class="lab">
+        <div class="lab-bar">
+          <span>Caccia all'errore</span>
+          <span class="lab-acts">
+            <button class="btn btn-run" data-run>Esegui ▸</button>
+            <button class="btn" data-reset>Ripristina</button>
+          </span>
+        </div>
+        <textarea spellcheck="false">const prodotti = [
+  { id: 1, nome: "Tastiera", prezzo: 45 },
+  { id: 2, nome: "Mouse", prezzo: 25 }
+]
+
+console.log(prodotti.find(p =&gt; p.id === 99).nome)
+
+// console.log(prodotti.map(p =&gt; { nome: p.nome }))
+
+// console.log([].reduce((acc, n) =&gt; acc + n))
+
+// const uno = prodotti[0]
+// console.log(uno.map(p =&gt; p.nome))</textarea>
+        <div class="lab-out"></div>
+      </div>
+    </section>
+
+    <!-- ============ 10 ============ -->
+    <section class="pane">
+      <div class="eyebrow">Sezione 10</div>
+      <h1>Controlla di aver capito</h1>
+      <p class="lead">Prima la lista di quello che devi saper fare, poi dieci domande. Rispondi senza guardare indietro: serve a te, non a nessun altro.</p>
+
+      <h2>So fare</h2>
+      <p>Spunta solo le voci per cui sapresti scrivere il codice adesso, senza consultare la pagina.</p>
+
+      <ul class="check">
+        <li><span class="check-mark"></span><span>So creare un oggetto, leggerne una proprietà col punto e con le quadre, aggiungerne e toglierne una</span></li>
+        <li><span class="check-mark"></span><span>So che chiedere una proprietà inesistente restituisce <code>undefined</code> senza errore</span></li>
+        <li><span class="check-mark"></span><span>So difendermi da una proprietà mancante con <code>?.</code> e dare un valore di riserva con <code>??</code></span></li>
+        <li><span class="check-mark"></span><span>So spiegare la differenza fra <code>??</code> e <code>||</code> quando il valore è <code>0</code></span></li>
+        <li><span class="check-mark"></span><span>So che <code>map()</code> restituisce un nuovo array della stessa lunghezza e non tocca l'originale</span></li>
+        <li><span class="check-mark"></span><span>So proiettare un array di oggetti su una proprietà o su un nuovo oggetto</span></li>
+        <li><span class="check-mark"></span><span>So quando servono le parentesi tonde in <code>p =&gt; ({ ... })</code></span></li>
+        <li><span class="check-mark"></span><span>So scegliere fra <code>filter()</code> e <code>find()</code> e so cosa restituiscono quando non trovano niente</span></li>
+        <li><span class="check-mark"></span><span>So perché <code>if (risultati)</code> è sbagliato dopo un <code>filter</code></span></li>
+        <li><span class="check-mark"></span><span>So scrivere un <code>reduce()</code> con accumulatore e valore iniziale esplicito</span></li>
+        <li><span class="check-mark"></span><span>So concatenare <code>.filter().map()</code> e so perché l'ordine conta</span></li>
+      </ul>
+
+      <div class="box note">
+        <div class="box-t">Se una casella è rimasta vuota</div>
+        <p>Torna alla sezione corrispondente e rifai gli esempi nel riquadro di esecuzione. Le voci su <code>map()</code> sono quelle che non puoi lasciare vuote: da lì in poi tutto il corso poggia su quel metodo.</p>
+      </div>
+
+      <h2>Dieci domande</h2>
+
+      <div class="q" data-a="2">
+        <p class="q-t">Con <code>const u = { nome: "Pete" }</code>, che cosa stampa <code>console.log(u.eta)</code>?</p>
+        <div class="opts">
+          <button class="opt">Un ReferenceError</button>
+          <button class="opt">Un TypeError</button>
+          <button class="opt">undefined</button>
+          <button class="opt">null</button>
+        </div>
+        <div class="fb"></div>
+        <div class="fb-txt" hidden>In JavaScript puoi interrogare qualsiasi proprietà di un oggetto: se non esiste ottieni <code>undefined</code>, senza errore. È comodo, ma nasconde gli errori di battitura nei nomi delle proprietà.</div>
+      </div>
+
+      <div class="q" data-a="0">
+        <p class="q-t">Quanti elementi ha l'array restituito da <code>[1, 2, 3, 4].map(n =&gt; n * 2)</code>?</p>
+        <div class="opts">
+          <button class="opt">Quattro, sempre quanti quelli di partenza</button>
+          <button class="opt">Due, solo quelli che soddisfano la condizione</button>
+          <button class="opt">Uno, il primo trasformato</button>
+          <button class="opt">Dipende dai valori dell'array</button>
+        </div>
+        <div class="fb"></div>
+        <div class="fb-txt" hidden><code>map()</code> è un trasformatore, non un setaccio: applica la funzione a ogni elemento e raccoglie tutti i risultati. La lunghezza del nuovo array è per costruzione uguale a quella dell'originale. Se ti servono meno elementi ti serve <code>filter()</code>.</div>
+      </div>
+
+      <div class="q" data-a="3">
+        <p class="q-t">Dopo <code>const nuovi = vecchi.map(n =&gt; n * 2)</code>, com'è l'array <code>vecchi</code>?</p>
+        <div class="opts">
+          <button class="opt">Ha i valori raddoppiati</button>
+          <button class="opt">È diventato vuoto</button>
+          <button class="opt">Contiene ora gli stessi elementi di <code>nuovi</code></button>
+          <button class="opt">È esattamente come prima</button>
+        </div>
+        <div class="fb"></div>
+        <div class="fb-txt" hidden><code>map()</code> costruisce un array nuovo e lascia intatto quello di partenza: è l'<strong>immutabilità</strong> di cui parla il libro a p. 269. In React è indispensabile, perché il confronto fra vecchio e nuovo array è ciò che fa scattare il ridisegno dell'interfaccia.</div>
+      </div>
+
+      <div class="q" data-a="1">
+        <p class="q-t">Che cosa restituisce <code>prodotti.filter(p =&gt; p.prezzo &gt; 10000)</code> se nessun prodotto costa così tanto?</p>
+        <div class="opts">
+          <button class="opt"><code>undefined</code></button>
+          <button class="opt">Un array vuoto <code>[]</code></button>
+          <button class="opt"><code>null</code></button>
+          <button class="opt">Genera un errore</button>
+        </div>
+        <div class="fb"></div>
+        <div class="fb-txt" hidden><code>filter()</code> restituisce <strong>sempre</strong> un array, eventualmente vuoto. E qui scatta la trappola: <code>[]</code> è truthy, quindi <code>if (risultati)</code> è vero anche senza risultati. Si controlla con <code>if (risultati.length &gt; 0)</code>.</div>
+      </div>
+
+      <div class="q" data-a="2">
+        <p class="q-t">Devi trovare l'unico studente con matricola 4471. Quale metodo è semanticamente corretto?</p>
+        <div class="opts">
+          <button class="opt"><code>map()</code>, perché trasforma la lista</button>
+          <button class="opt"><code>filter()</code>, e poi si legge il primo elemento</button>
+          <button class="opt"><code>find()</code>, perché il risultato è uno solo</button>
+          <button class="opt"><code>reduce()</code>, perché sintetizza in un valore</button>
+        </div>
+        <div class="fb"></div>
+        <div class="fb-txt" hidden>Con un identificatore unico si usa <code>find()</code>: si ferma al primo riscontro e restituisce direttamente l'oggetto, così puoi scrivere <code>studente.nome</code> senza passare da <code>[0]</code>. <code>filter()</code> funzionerebbe, ma restituirebbe un array da un solo elemento: una complicazione inutile.</div>
+      </div>
+
+      <div class="q" data-a="3">
+        <p class="q-t">Che cosa restituisce <code>find()</code> quando nessun elemento soddisfa la condizione?</p>
+        <div class="opts">
+          <button class="opt">Un array vuoto</button>
+          <button class="opt">Il primo elemento della lista</button>
+          <button class="opt"><code>false</code></button>
+          <button class="opt"><code>undefined</code></button>
+        </div>
+        <div class="fb"></div>
+        <div class="fb-txt" hidden><code>find()</code> restituisce <code>undefined</code>, non un array vuoto: è la differenza con <code>filter()</code>. Perciò mettere subito il punto dopo un <code>find()</code> è rischioso, e la forma sicura è <code>lista.find(...)?.nome ?? "non trovato"</code>.</div>
+      </div>
+
+      <div class="q" data-a="1">
+        <p class="q-t">In <code>numeri.reduce((acc, n) =&gt; acc + n, 0)</code>, a che cosa serve lo <code>0</code> finale?</p>
+        <div class="opts">
+          <button class="opt">Indica da quale indice iniziare a scorrere</button>
+          <button class="opt">È il valore iniziale dell'accumulatore</button>
+          <button class="opt">È il valore restituito se l'array è vuoto, e nient'altro</button>
+          <button class="opt">È opzionale e non cambia mai il risultato</button>
+        </div>
+        <div class="fb"></div>
+        <div class="fb-txt" hidden>È il valore da cui parte l'accumulatore, la "palla di neve" prima di iniziare a rotolare. Il libro insiste che vada <strong>sempre</strong> dichiarato esplicitamente: senza, su un array vuoto ottieni <code>TypeError: Reduce of empty array with no initial value</code>. Determina anche il tipo del risultato: <code>0</code> per un numero, <code>[]</code> per un array, <code>{}</code> per un oggetto.</div>
+      </div>
+
+      <div class="q" data-a="0">
+        <p class="q-t">Perché <code>const l = p.map(x =&gt; { nome: x.nome })</code> restituisce un array di <code>undefined</code>?</p>
+        <div class="opts">
+          <button class="opt">Le graffe sono lette come corpo della funzione, che quindi non restituisce niente</button>
+          <button class="opt">Perché <code>map</code> non può restituire oggetti</button>
+          <button class="opt">Perché manca il valore iniziale</button>
+          <button class="opt">Perché <code>nome</code> non esiste negli elementi</button>
+        </div>
+        <div class="fb"></div>
+        <div class="fb-txt" hidden>JavaScript legge <code>{ ... }</code> dopo la freccia come un blocco di istruzioni, non come un oggetto letterale. Senza <code>return</code>, la funzione restituisce <code>undefined</code>. Si risolve con le tonde — <code>x =&gt; ({ nome: x.nome })</code> — oppure scrivendo il <code>return</code> dentro le graffe.</div>
+      </div>
+
+      <div class="q" data-a="2">
+        <p class="q-t">Che cosa stampa <code>console.log(0 ?? 100)</code>?</p>
+        <div class="opts">
+          <button class="opt">100, perché 0 è falsy</button>
+          <button class="opt"><code>undefined</code></button>
+          <button class="opt">0, perché 0 non è né null né undefined</button>
+          <button class="opt">Genera un errore di sintassi</button>
+        </div>
+        <div class="fb"></div>
+        <div class="fb-txt" hidden><code>??</code> sostituisce il valore <strong>solo</strong> se è <code>null</code> o <code>undefined</code>. Lo zero è un dato legittimo e resta. Con <code>||</code> avresti ottenuto <code>100</code>, falsificando il dato: è il motivo per cui su quantità, punteggi e giacenze si usa <code>??</code>.</div>
+      </div>
+
+      <div class="q" data-a="1">
+        <p class="q-t">Perché <code>lista.map(p =&gt; p.nome).filter(p =&gt; p.prezzo &lt; 50)</code> restituisce un array vuoto?</p>
+        <div class="opts">
+          <button class="opt">Perché <code>map</code> e <code>filter</code> non si possono concatenare</button>
+          <button class="opt">Perché dopo il <code>map</code> restano solo stringhe, che non hanno la proprietà <code>prezzo</code></button>
+          <button class="opt">Perché <code>filter</code> va sempre chiamato per primo, per una regola del linguaggio</button>
+          <button class="opt">Perché manca il valore iniziale nel <code>filter</code></button>
+        </div>
+        <div class="fb"></div>
+        <div class="fb-txt" hidden>Il <code>map</code> ha già proiettato gli oggetti sui soli nomi: il <code>filter</code> riceve stringhe, per cui <code>p.prezzo</code> vale <code>undefined</code> e il confronto è sempre falso. Concatenare si può eccome, ma l'ordine conta: <strong>filtra prima, trasforma dopo</strong>. È anche più efficiente, perché trasformi meno elementi.</div>
+      </div>
+
+      <div class="score" id="score">Risposte corrette: 0 / 10</div>
+
+      <h2>La prossima settimana</h2>
+      <p>Il DOM: come JavaScript legge e modifica una pagina HTML, e come si reagisce a un click con <code>addEventListener</code>. Incontrerai il pattern <strong>State → Render</strong> di cui parla il libro a p. 277: si modifica l'array e si richiama una funzione <code>render()</code>, invece di ritoccare a mano il singolo elemento della pagina.</p>
+      <p>E dentro quella <code>render()</code> ci sarà un <code>map</code>. Sempre lui.</p>
+    </section>
+
+  </main>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ---------- NAVIGAZIONE ---------- */
+  var navBtns = document.querySelectorAll(".rail-btn");
+  var panes = document.querySelectorAll(".pane");
+
+  navBtns.forEach(function (b) {
+    b.addEventListener("click", function () {
+      var i = parseInt(b.getAttribute("data-p"), 10);
+      navBtns.forEach(function (x) { x.classList.remove("on"); });
+      panes.forEach(function (x) { x.classList.remove("on"); });
+      b.classList.add("on");
+      if (panes[i]) panes[i].classList.add("on");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+  });
+
+  /* ---------- TEMA ---------- */
+  var tog = document.getElementById("themeTog");
+  tog.addEventListener("click", function () {
+    var cur = document.documentElement.getAttribute("data-theme");
+    var dark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    var next;
+    if (cur === "dark") next = "light";
+    else if (cur === "light") next = "dark";
+    else next = dark ? "light" : "dark";
+    document.documentElement.setAttribute("data-theme", next);
+  });
+
+  /* ---------- CONSOLE INTEGRATA ---------- */
+  function format(v, depth) {
+    depth = depth || 0;
+    if (v === null) return "null";
+    if (v === undefined) return "undefined";
+    var t = typeof v;
+    if (t === "string") return depth === 0 ? v : '"' + v + '"';
+    if (t === "number" || t === "boolean") return String(v);
+    if (t === "function") return v.name ? "ƒ " + v.name + "()" : "ƒ ()";
+    if (t === "symbol" || t === "bigint") return String(v);
+    if (Array.isArray(v)) {
+      if (depth > 3) return "[…]";
+      return "[ " + v.map(function (x) { return format(x, depth + 1); }).join(", ") + " ]";
+    }
+    if (v instanceof Error) return v.name + ": " + v.message;
+    if (t === "object") {
+      if (depth > 3) return "{…}";
+      var keys = Object.keys(v);
+      if (keys.length === 0) return "{}";
+      return "{ " + keys.map(function (k) {
+        return k + ": " + format(v[k], depth + 1);
+      }).join(", ") + " }";
+    }
+    return String(v);
+  }
+
+  document.querySelectorAll(".lab").forEach(function (lab) {
+    var ta = lab.querySelector("textarea");
+    var out = lab.querySelector(".lab-out");
+    var runBtn = lab.querySelector("[data-run]");
+    var resetBtn = lab.querySelector("[data-reset]");
+    var original = ta.value;
+
+    function write(text, isErr) {
+      var line = document.createElement("span");
+      line.className = "ln" + (isErr ? " err" : "");
+      line.textContent = text;
+      out.appendChild(line);
+    }
+
+    function run() {
+      out.textContent = "";
+      var realLog = console.log;
+      var realWarn = console.warn;
+      var realError = console.error;
+      var captured = false;
+
+      function capture(isErr) {
+        return function () {
+          captured = true;
+          var parts = [];
+          for (var i = 0; i < arguments.length; i++) {
+            parts.push(format(arguments[i], 0));
+          }
+          write(parts.join(" "), isErr);
+        };
+      }
+
+      console.log = capture(false);
+      console.warn = capture(false);
+      console.error = capture(true);
+
+      try {
+        // eslint-disable-next-line no-new-func
+        var fn = new Function('"use strict";\n' + ta.value);
+        fn();
+        if (!captured) {
+          write("(nessun output: usa console.log per stampare)", false);
+        }
+      } catch (e) {
+        write(e.name + ": " + e.message, true);
+      } finally {
+        console.log = realLog;
+        console.warn = realWarn;
+        console.error = realError;
+      }
+    }
+
+    runBtn.addEventListener("click", run);
+
+    if (resetBtn) {
+      resetBtn.addEventListener("click", function () {
+        ta.value = original;
+        out.textContent = "";
+      });
+    }
+
+    // Ctrl+Invio esegue, Tab inserisce due spazi
+    ta.addEventListener("keydown", function (e) {
+      if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
+        e.preventDefault();
+        run();
+        return;
+      }
+      if (e.key === "Tab") {
+        e.preventDefault();
+        var s = ta.selectionStart;
+        var en = ta.selectionEnd;
+        ta.value = ta.value.substring(0, s) + "  " + ta.value.substring(en);
+        ta.selectionStart = ta.selectionEnd = s + 2;
+      }
+    });
+  });
+
+  /* ---------- AIUTO E SOLUZIONE ---------- */
+  document.querySelectorAll(".reveal").forEach(function (r) {
+    var btns = r.querySelectorAll(".reveal-btn");
+    var bodies = r.querySelectorAll(".reveal-body");
+    btns.forEach(function (b, i) {
+      b.addEventListener("click", function () {
+        if (!bodies[i]) return;
+        var open = bodies[i].classList.toggle("open");
+        b.textContent = (open ? "Nascondi " : "") + (i === 0 ? "Aiuto" : "Soluzione");
+      });
+    });
+  });
+
+  /* ---------- CHECKLIST ---------- */
+  document.querySelectorAll(".check li").forEach(function (li) {
+    li.addEventListener("click", function () {
+      li.classList.toggle("done");
+    });
+  });
+
+  /* ---------- QUIZ ---------- */
+  var right = 0;
+  var scoreBox = document.getElementById("score");
+  var totalQ = document.querySelectorAll(".q").length;
+
+  document.querySelectorAll(".q").forEach(function (q) {
+    var correct = parseInt(q.getAttribute("data-a"), 10);
+    var opts = q.querySelectorAll(".opt");
+    var fb = q.querySelector(".fb");
+    var fbTxt = q.querySelector(".fb-txt");
+
+    opts.forEach(function (o, i) {
+      o.addEventListener("click", function () {
+        if (q.dataset.done) return;
+        q.dataset.done = "1";
+        opts.forEach(function (x) { x.disabled = true; });
+        opts[correct].classList.add("right");
+        if (i !== correct) o.classList.add("wrong");
+        else right++;
+        if (fb && fbTxt) {
+          fb.innerHTML = fbTxt.innerHTML;
+          fb.classList.add("show");
+        }
+        if (scoreBox) {
+          scoreBox.textContent = "Risposte corrette: " + right + " / " + totalQ;
+        }
+      });
+    });
+  });
+})();
+</script>
+
+</body>
+</html>

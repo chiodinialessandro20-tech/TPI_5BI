@@ -1,0 +1,2527 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Settimana 3 — Destructuring, spread, immutabilità e moduli</title>
+<style>
+:root {
+  --ink: #12181F;
+  --ink-soft: #445366;
+  --ink-faint: #7A8899;
+  --ground: #F7F8FA;
+  --surface: #FFFFFF;
+  --surface-alt: #EDF1F5;
+  --line: #D6DEE7;
+  --deep: #1B3A5C;
+  --deep-soft: #E3ECF4;
+  --teal: #2A9D8F;
+  --teal-soft: #DCF0ED;
+  --amber: #C97F14;
+  --amber-soft: #FBEEDA;
+  --rose: #B4462F;
+  --rose-soft: #FAE6E1;
+  --violet: #6B4E9E;
+  --violet-soft: #EDE7F7;
+  --shadow: 0 1px 2px rgba(18,24,31,.06), 0 8px 24px rgba(18,24,31,.06);
+  --radius: 10px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ink: #E8EDF3;
+    --ink-soft: #A9B7C6;
+    --ink-faint: #74838F;
+    --ground: #0E1319;
+    --surface: #171E27;
+    --surface-alt: #1F2833;
+    --line: #2C3742;
+    --deep: #7FB3DC;
+    --deep-soft: #1A2C3D;
+    --teal: #4FC1B0;
+    --teal-soft: #16302D;
+    --amber: #E5A845;
+    --amber-soft: #33280F;
+    --rose: #E08872;
+    --rose-soft: #35201B;
+    --violet: #A98FD8;
+    --violet-soft: #241C33;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.3);
+  }
+}
+:root[data-theme="dark"] {
+  --ink: #E8EDF3;
+  --ink-soft: #A9B7C6;
+  --ink-faint: #74838F;
+  --ground: #0E1319;
+  --surface: #171E27;
+  --surface-alt: #1F2833;
+  --line: #2C3742;
+  --deep: #7FB3DC;
+  --deep-soft: #1A2C3D;
+  --teal: #4FC1B0;
+  --teal-soft: #16302D;
+  --amber: #E5A845;
+  --amber-soft: #33280F;
+  --rose: #E08872;
+  --rose-soft: #35201B;
+  --violet: #A98FD8;
+  --violet-soft: #241C33;
+  --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.3);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--ground);
+  color: var(--ink);
+  font-family: Georgia, "Iowan Old Style", "Palatino Linotype", serif;
+  font-size: 17px;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, .ui {
+  font-family: "Segoe UI", -apple-system, "Helvetica Neue", Arial, sans-serif;
+}
+
+code, .mono, pre, textarea {
+  font-family: "Cascadia Code", "Consolas", "SF Mono", monospace;
+  font-size: .92em;
+}
+
+/* ---------- LAYOUT ---------- */
+.wrap {
+  display: grid;
+  grid-template-columns: 270px minmax(0, 1fr);
+  min-height: 100vh;
+}
+
+/* ---------- SIDEBAR ---------- */
+.rail {
+  background: var(--surface);
+  border-right: 1px solid var(--line);
+  padding: 28px 0 40px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+}
+.rail-head {
+  padding: 0 24px 22px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 18px;
+}
+.rail-eyebrow {
+  font-family: "Segoe UI", sans-serif;
+  font-size: 11px;
+  letter-spacing: .13em;
+  text-transform: uppercase;
+  color: var(--teal);
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+.rail-title {
+  font-size: 19px;
+  font-weight: 650;
+  line-height: 1.25;
+  margin: 0;
+  letter-spacing: -.01em;
+}
+.rail-sub {
+  font-family: "Segoe UI", sans-serif;
+  font-size: 12.5px;
+  color: var(--ink-faint);
+  margin-top: 7px;
+}
+.rail nav { display: flex; flex-direction: column; gap: 2px; padding: 0 12px; }
+.rail-day {
+  font-family: "Segoe UI", sans-serif;
+  font-size: 10.5px;
+  letter-spacing: .11em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: var(--amber);
+  padding: 14px 12px 6px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+.rail-day::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--line);
+}
+.rail-day:first-child { padding-top: 2px; }
+.rail-btn {
+  display: grid;
+  grid-template-columns: 30px 1fr;
+  gap: 10px;
+  align-items: start;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: 0;
+  padding: 11px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  color: var(--ink-soft);
+  font-family: "Segoe UI", sans-serif;
+  font-size: 14px;
+  line-height: 1.35;
+  transition: background .15s, color .15s;
+}
+.rail-btn:hover { background: var(--surface-alt); color: var(--ink); }
+.rail-btn.on { background: var(--deep-soft); color: var(--deep); font-weight: 600; }
+.rail-num {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--ink-faint);
+  background: var(--surface-alt);
+  border-radius: 5px;
+  padding: 2px 0;
+  text-align: center;
+  letter-spacing: .02em;
+}
+.rail-btn.on .rail-num { background: var(--deep); color: #fff; }
+.rail-foot {
+  padding: 22px 24px 0;
+  margin-top: 20px;
+  border-top: 1px solid var(--line);
+  font-family: "Segoe UI", sans-serif;
+  font-size: 12px;
+  color: var(--ink-faint);
+  line-height: 1.5;
+}
+.home-link {
+  display: inline-block;
+  margin-bottom: 12px;
+  color: var(--teal);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 12.5px;
+}
+.home-link:hover { text-decoration: underline; }
+
+/* ---------- MAIN ---------- */
+.main { padding: 46px 56px 100px; max-width: 900px; }
+.pane { display: none; animation: fade .25s ease; }
+.pane.on { display: block; }
+@keyframes fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+.eyebrow {
+  font-family: "Segoe UI", sans-serif;
+  font-size: 11.5px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--teal);
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+h1 {
+  font-size: 33px;
+  line-height: 1.18;
+  margin: 0 0 14px;
+  letter-spacing: -.022em;
+  font-weight: 680;
+}
+h2 {
+  font-size: 22px;
+  margin: 44px 0 14px;
+  letter-spacing: -.014em;
+  font-weight: 650;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--line);
+}
+h3 {
+  font-size: 17px;
+  margin: 30px 0 10px;
+  font-weight: 650;
+  color: var(--deep);
+}
+p { margin: 0 0 15px; }
+.lead { font-size: 18.5px; color: var(--ink-soft); margin-bottom: 26px; line-height: 1.6; }
+ul, ol { margin: 0 0 16px; padding-left: 22px; }
+li { margin-bottom: 7px; }
+strong { font-weight: 700; }
+
+code {
+  background: var(--surface-alt);
+  padding: 1.5px 5px;
+  border-radius: 4px;
+  color: var(--deep);
+}
+
+pre {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--deep);
+  border-radius: var(--radius);
+  padding: 15px 18px;
+  overflow-x: auto;
+  margin: 0 0 18px;
+  line-height: 1.6;
+  font-size: 14px;
+}
+pre code { background: none; padding: 0; color: var(--ink); }
+
+/* ---------- BLOCCHI ---------- */
+.box {
+  border-radius: var(--radius);
+  padding: 17px 20px;
+  margin: 0 0 20px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+}
+.box-t {
+  font-family: "Segoe UI", sans-serif;
+  font-size: 11.5px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+.box p:last-child, .box ul:last-child, .box ol:last-child { margin-bottom: 0; }
+
+.warn { background: var(--rose-soft); border-color: var(--rose); }
+.warn .box-t { color: var(--rose); }
+.tip { background: var(--teal-soft); border-color: var(--teal); }
+.tip .box-t { color: var(--teal); }
+.note { background: var(--amber-soft); border-color: var(--amber); }
+.note .box-t { color: var(--amber); }
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0 0 20px;
+  font-size: 15px;
+  font-family: "Segoe UI", sans-serif;
+  background: var(--surface);
+  border-radius: var(--radius);
+  overflow: hidden;
+  border: 1px solid var(--line);
+}
+th {
+  background: var(--surface-alt);
+  text-align: left;
+  padding: 11px 14px;
+  font-weight: 650;
+  font-size: 13.5px;
+  border-bottom: 1px solid var(--line);
+}
+td { padding: 11px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+tr:last-child td { border-bottom: 0; }
+.tbl-scroll { overflow-x: auto; }
+
+/* ---------- CONSOLE ---------- */
+.lab {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin: 0 0 22px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+.lab-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: var(--surface-alt);
+  padding: 9px 14px;
+  border-bottom: 1px solid var(--line);
+  font-family: "Segoe UI", sans-serif;
+  font-size: 12px;
+  font-weight: 650;
+  color: var(--ink-soft);
+  letter-spacing: .03em;
+}
+.lab-acts { display: flex; gap: 7px; }
+.btn {
+  font-family: "Segoe UI", sans-serif;
+  font-size: 12.5px;
+  font-weight: 600;
+  padding: 5px 13px;
+  border-radius: 6px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: background .14s, color .14s, border-color .14s;
+}
+.btn:hover { background: var(--deep-soft); color: var(--deep); border-color: var(--deep); }
+.btn-run { background: var(--teal); border-color: var(--teal); color: #fff; }
+.btn-run:hover { background: var(--teal); border-color: var(--teal); color: #fff; filter: brightness(1.08); }
+.lab textarea {
+  width: 100%;
+  border: 0;
+  padding: 15px 18px;
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 14px;
+  line-height: 1.65;
+  resize: vertical;
+  min-height: 130px;
+  display: block;
+  outline: none;
+  tab-size: 2;
+}
+.lab-out {
+  border-top: 1px solid var(--line);
+  background: var(--surface-alt);
+  padding: 12px 18px;
+  font-family: "Cascadia Code", "Consolas", monospace;
+  font-size: 13.5px;
+  line-height: 1.6;
+  min-height: 44px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: var(--ink-soft);
+}
+.lab-out:empty::before {
+  content: "L'output comparirà qui.";
+  color: var(--ink-faint);
+  font-style: italic;
+}
+.lab-out .err { color: var(--rose); font-weight: 600; }
+.lab-out .ln { display: block; }
+
+/* ---------- ESERCIZI ---------- */
+.ex {
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--violet);
+  border-radius: var(--radius);
+  background: var(--surface);
+  padding: 18px 22px;
+  margin: 0 0 20px;
+}
+.ex-h {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.ex-n {
+  font-family: "Segoe UI", sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+  color: var(--violet);
+  background: var(--violet-soft);
+  padding: 3px 9px;
+  border-radius: 5px;
+  white-space: nowrap;
+}
+.ex-t {
+  font-family: "Segoe UI", sans-serif;
+  font-size: 16px;
+  font-weight: 650;
+  margin: 0;
+}
+.ex-lvl {
+  margin-left: auto;
+  font-family: "Segoe UI", sans-serif;
+  font-size: 11px;
+  color: var(--ink-faint);
+  letter-spacing: .05em;
+  white-space: nowrap;
+}
+.ex > p:last-child { margin-bottom: 0; }
+
+.reveal { margin-top: 12px; }
+.reveal-btn {
+  font-family: "Segoe UI", sans-serif;
+  font-size: 12.5px;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: 6px;
+  border: 1px solid var(--line);
+  background: var(--surface-alt);
+  color: var(--ink-soft);
+  cursor: pointer;
+  margin-right: 8px;
+  transition: background .14s, color .14s;
+}
+.reveal-btn:hover { background: var(--deep-soft); color: var(--deep); }
+.reveal-body {
+  display: none;
+  margin-top: 12px;
+  padding: 14px 17px;
+  background: var(--surface-alt);
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  font-size: 15.5px;
+}
+.reveal-body.open { display: block; }
+.reveal-body pre { margin-bottom: 0; background: var(--surface); }
+.reveal-body p:last-child { margin-bottom: 0; }
+
+/* ---------- CHECKLIST ---------- */
+.check { list-style: none; padding: 0; margin: 0 0 20px; }
+.check li {
+  display: flex;
+  gap: 11px;
+  align-items: flex-start;
+  padding: 11px 15px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  margin-bottom: 8px;
+  cursor: pointer;
+  font-family: "Segoe UI", sans-serif;
+  font-size: 15px;
+  transition: background .14s, border-color .14s;
+}
+.check li:hover { background: var(--surface-alt); }
+.check li.done { background: var(--teal-soft); border-color: var(--teal); }
+.check-mark {
+  width: 19px;
+  height: 19px;
+  border: 2px solid var(--line);
+  border-radius: 5px;
+  flex-shrink: 0;
+  margin-top: 2px;
+  position: relative;
+  transition: background .14s, border-color .14s;
+}
+.check li.done .check-mark { background: var(--teal); border-color: var(--teal); }
+.check li.done .check-mark::after {
+  content: "";
+  position: absolute;
+  left: 4.5px; top: 1px;
+  width: 5px; height: 9px;
+  border: solid #fff;
+  border-width: 0 2.5px 2.5px 0;
+  transform: rotate(43deg);
+}
+
+/* ---------- QUIZ ---------- */
+.q {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  padding: 18px 21px;
+  margin: 0 0 15px;
+}
+.q-t { font-family: "Segoe UI", sans-serif; font-size: 15.5px; font-weight: 600; margin-bottom: 13px; }
+.q-t code { font-size: .92em; }
+.opts { display: flex; flex-direction: column; gap: 7px; }
+.opt {
+  text-align: left;
+  font-family: "Segoe UI", sans-serif;
+  font-size: 14.5px;
+  padding: 10px 14px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--surface);
+  color: var(--ink);
+  cursor: pointer;
+  transition: background .14s, border-color .14s;
+  line-height: 1.45;
+}
+.opt:hover:not(:disabled) { background: var(--surface-alt); border-color: var(--deep); }
+.opt:disabled { cursor: default; }
+.opt.right { background: var(--teal-soft); border-color: var(--teal); font-weight: 600; }
+.opt.wrong { background: var(--rose-soft); border-color: var(--rose); }
+.fb {
+  margin-top: 12px;
+  padding: 11px 15px;
+  border-radius: 7px;
+  font-family: "Segoe UI", sans-serif;
+  font-size: 14px;
+  line-height: 1.55;
+  display: none;
+  background: var(--surface-alt);
+  border-left: 3px solid var(--deep);
+}
+.fb.show { display: block; }
+.fb code { font-size: .93em; }
+
+.score {
+  position: sticky;
+  bottom: 20px;
+  background: var(--deep);
+  color: #fff;
+  padding: 12px 22px;
+  border-radius: 30px;
+  font-family: "Segoe UI", sans-serif;
+  font-size: 14.5px;
+  font-weight: 650;
+  text-align: center;
+  box-shadow: 0 5px 20px rgba(0,0,0,.19);
+  margin-top: 26px;
+  display: inline-block;
+}
+
+/* ---------- MISC ---------- */
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  margin-bottom: 26px;
+}
+.chip {
+  font-family: "Segoe UI", sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 5px 12px;
+  border-radius: 20px;
+  background: var(--surface-alt);
+  color: var(--ink-soft);
+  border: 1px solid var(--line);
+}
+.chip-hi { background: var(--deep-soft); color: var(--deep); border-color: var(--deep); }
+
+.origin {
+  font-style: italic;
+  color: var(--ink-faint);
+  font-size: 14.5px;
+  border-left: 2px solid var(--line);
+  padding-left: 14px;
+  margin: 0 0 18px;
+  font-family: "Segoe UI", sans-serif;
+}
+
+.theme-tog {
+  position: fixed;
+  top: 18px;
+  right: 20px;
+  z-index: 40;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink-soft);
+  cursor: pointer;
+  font-size: 15px;
+  line-height: 1;
+  box-shadow: var(--shadow);
+}
+.theme-tog:hover { color: var(--deep); }
+
+@media (max-width: 880px) {
+  .wrap { grid-template-columns: 1fr; }
+  .rail { position: static; height: auto; }
+  .rail nav { flex-direction: row; flex-wrap: wrap; }
+  .rail-btn { width: auto; }
+  .main { padding: 32px 22px 80px; }
+  h1 { font-size: 27px; }
+}
+
+.firma-rail {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+  font-family: "Segoe UI", sans-serif;
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: var(--ink-faint);
+}
+.firma-rail b { color: var(--ink-soft); font-weight: 650; display: block; margin-bottom: 3px; }
+.firma-testa {
+  font-family: "Segoe UI", sans-serif;
+  font-size: 11px;
+  color: var(--ink-faint);
+  margin-top: 8px;
+  letter-spacing: .01em;
+}
+</style>
+</head>
+<body>
+
+<button class="theme-tog ui" id="themeTog" title="Cambia tema">◐</button>
+
+<div class="wrap">
+
+  <aside class="rail">
+    <div class="rail-head">
+      <div class="rail-eyebrow">Laboratorio · Settimana 3</div>
+      <h2 class="rail-title" style="border:0;padding:0;margin:0;">Immutabilità e moduli</h2>
+      <div class="rail-sub">Destructuring, spread e le tre formule</div>
+    <div class="firma-testa">Prof.ssa Paola Bertulli &middot; a.s. 2026/27</div>
+    </div>
+    <nav id="nav">
+      <div class="rail-day">Primo giorno · 2 ore</div>
+      <button class="rail-btn on" data-p="0"><span class="rail-num">00</span><span>Perché l'immutabilità</span></button>
+      <button class="rail-btn" data-p="1"><span class="rail-num">01</span><span>Destructuring di array</span></button>
+      <button class="rail-btn" data-p="2"><span class="rail-num">02</span><span>Destructuring di oggetti</span></button>
+      <button class="rail-btn" data-p="3"><span class="rail-num">03</span><span>Spread <code>...</code></span></button>
+      <button class="rail-btn" data-p="4"><span class="rail-num">04</span><span>Valori, riferimenti, shallow copy</span></button>
+      <button class="rail-btn" data-p="5"><span class="rail-num">05</span><span>Le tre manipolazioni immutabili</span></button>
+      <button class="rail-btn" data-p="6"><span class="rail-num">06</span><span>Officina · esercizi 1–4</span></button>
+      <div class="rail-day">Secondo giorno · 1 ora</div>
+      <button class="rail-btn" data-p="7"><span class="rail-num">07</span><span>Riscaldamento</span></button>
+      <button class="rail-btn" data-p="8"><span class="rail-num">08</span><span>Officina · esercizi 5–7</span></button>
+      <button class="rail-btn" data-p="9"><span class="rail-num">09</span><span>Moduli <code>import</code> / <code>export</code></span></button>
+      <button class="rail-btn" data-p="10"><span class="rail-num">10</span><span>Controlla di aver capito</span></button>
+    </nav>
+    <div class="rail-foot">
+      <a class="home-link" href="../index.html">&larr; Indice dell'anno</a>
+      <div>TPSIT · classe quinta<br>Rif. Pollini vol. 3, cap. 9.1 (p. 268) per i moduli ES6; cap. 9.2 (p. 269) per l'immutabilità di <code>map</code> e <code>filter</code></div>
+        <div class="firma-rail"><b>Prof.ssa Paola Bertulli</b>Materiale didattico originale. I rimandi al testo di A.&nbsp;Pollini, <em>Progettare per Innovare</em> vol.&nbsp;3, servono per ritrovare e approfondire gli argomenti sul libro.</div>
+</div>
+  </aside>
+
+  <main class="main">
+
+    <!-- ============ 0 ============ -->
+    <section class="pane on">
+      <div class="eyebrow">Settimana 3 · 3 ore di laboratorio</div>
+      <h1>Destructuring, spread, immutabilità e moduli</h1>
+      <p class="lead">Oggi impari a modificare una lista senza modificarla. Sembra un gioco di parole: è invece la regola su cui poggia tutto React.</p>
+
+      <div class="meta">
+        <span class="chip chip-hi">Tre formule da memorizzare</span>
+        <span class="chip">7 esercizi</span>
+        <span class="chip">Console integrata</span>
+      </div>
+
+      <h2>Da dove veniamo</h2>
+      <p>La settimana scorsa hai usato <code>map</code> e <code>filter</code>. Hai visto che nessuno dei due tocca l'array di partenza: restituiscono un array <strong>nuovo</strong>. Quella proprietà ha un nome, ed è il tema di oggi: <strong>immutabilità</strong>.</p>
+      <p>Il libro la nomina proprio parlando di <code>map</code>: restituisce un nuovo array della stessa lunghezza e l'originale resta intatto (cap. 9.2, p. 269).</p>
+
+      <h2>Perché ti serve</h2>
+      <p>Quando arriverai a React, nella settimana 8, i dati della tua applicazione staranno dentro <code>useState</code>. React confronta il vecchio valore e il nuovo per capire se deve ridisegnare la pagina. Il confronto non guarda dentro: guarda se è <em>lo stesso oggetto</em>.</p>
+
+      <div class="box warn">
+        <div class="box-t">La conseguenza pratica</div>
+        <p>Se modifichi l'array esistente con <code>push</code>, l'oggetto rimane lo stesso. React confronta, non vede differenze, e non ridisegna niente. Il dato è cambiato ma sullo schermo non succede nulla.</p>
+        <p>Non è un errore che il browser ti segnala. Non compare nessun messaggio rosso. Semplicemente la pagina resta ferma, e tu passi mezz'ora a cercare un bug che non c'è.</p>
+      </div>
+
+      <h2>Il traguardo di oggi</h2>
+      <p>A fine giornata sai eseguire le <strong>tre manipolazioni immutabili</strong>. Sono queste, e sono il 90% del codice che scriverai in React:</p>
+
+      <pre><code>// aggiungere
+[...lista, nuovo]
+
+// rimuovere
+lista.filter(x =&gt; x.id !== id)
+
+// modificare
+lista.map(x =&gt; x.id === id ? {...x, fatto: true} : x)</code></pre>
+
+      <p>Non devi capirle adesso. Devi arrivarci alla sezione 05 con gli strumenti giusti in mano: il <code>...</code> lo vedi nella sezione 03, il perché nella 04.</p>
+
+      <h2>Provala subito</h2>
+      <p>Ecco la differenza in cinque righe. Esegui e guarda i due output.</p>
+
+      <div class="lab">
+        <div class="lab-bar">
+          <span>Mutabile contro immutabile</span>
+          <span class="lab-acts">
+            <button class="btn btn-run" data-run>Esegui ▸</button>
+            <button class="btn" data-reset>Ripristina</button>
+          </span>
+        </div>
+        <textarea spellcheck="false">const originale = ["a", "b"]
+
+const mutata = originale
+mutata.push("c")
+console.log("originale dopo push:", originale)
+
+const altra = ["a", "b"]
+const nuova = [...altra, "c"]
+console.log("originale dopo spread:", altra)
+console.log("nuova:", nuova)</textarea>
+        <div class="lab-out"></div>
+      </div>
+
+      <p>Nel primo caso l'originale è cambiato senza che tu l'abbia chiesto. Nel secondo è rimasto intatto e hai un array nuovo accanto. È tutta qui la differenza.</p>
+
+      <h2>Che cosa sai fare a fine giornata</h2>
+      <ul>
+        <li>Estrarre valori da array e oggetti con il destructuring</li>
+        <li>Usare <code>...</code> per copiare, concatenare e unire</li>
+        <li>Spiegare perché <code>const</code> non blocca il contenuto di un array</li>
+        <li>Riconoscere il limite dello <em>shallow copy</em> e sapere quando ti farà male</li>
+        <li>Scrivere a memoria le tre manipolazioni immutabili</li>
+        <li>Dividere il codice in moduli con <code>import</code> ed <code>export</code></li>
+      </ul>
+    </section>
+
+    <!-- ============ 1 ============ -->
+    <section class="pane">
+      <div class="eyebrow">Sezione 01</div>
+      <h1>Destructuring di array</h1>
+      <p class="lead">Un modo compatto per estrarre più valori da un array in un colpo solo. Meno righe, più leggibile.</p>
+
+      <p class="origin">Destructuring e spread <strong>non</strong> sono trattati esplicitamente dal libro adottato. Il capitolo 9 li usa nel codice ma non li spiega. Questa sezione e le tre successive vengono dai materiali di laboratorio (<code>index06.js</code> e <code>index07.js</code>), non dal manuale: non cercarli sull'indice del testo.</p>
+
+      <h2>La versione classica</h2>
+      <p>Per prendere i primi elementi di un array scrivi una riga per ciascuno:</p>
+
+      <pre><code>const array = [1, 2, 3, 4, 5]
+const a = array[0]
+const b = array[1]
+const c = array[2]</code></pre>
+
+      <h2>La versione con destructuring</h2>
+      <p>Metti a sinistra le parentesi quadre con i nomi che vuoi. JavaScript assegna per posizione.</p>
+
+      <pre><code>const array = [1, 2, 3, 4, 5]
+const [a, b, c] = array
+console.log(a, b, c)   // 1 2 3</code></pre>
+
+      <div class="box tip">
+        <div class="box-t">Come si legge</div>
+        <p>Le parentesi quadre a sinistra dell'uguale <strong>non</strong> creano un array. Sono uno schema: dicono "il valore a destra è un array, prendi il primo elemento e chiamalo <code>a</code>, il secondo e chiamalo <code>b</code>".</p>
+      </div>
+
+      <div class="lab">
+        <div class="lab-bar">
+          <span>Le quattro forme</span>
+          <span class="lab-acts">
+            <button class="btn btn-run" data-run>Esegui ▸</button>
+            <button class="btn" data-reset>Ripristina</button>
+          </span>
+        </div>
+        <textarea spellcheck="false">const array = [1, 2, 3, 4, 5]
+
+// tutti in ordine
+const [f, g, h] = array
+console.log(f, g, h)
+
+// salto elementi: la virgola vuota consuma una posizione
+const [k, , l, , m] = array
+console.log(k, l, m)
+
+// il resto in un array
+const [n, ...resto] = array
+console.log(n, resto)</textarea>
+        <div class="lab-out"></div>
+      </div>
+
+      <h2>Il parametro <em>rest</em></h2>
+      <p>I tre puntini nella terza forma si chiamano <strong>rest</strong>: raccolgono tutto quello che avanza dentro un nuovo array. Attenzione, deve stare per forza in ultima posizione: <code>[...resto, n]</code> è un errore di sintassi.</p>
+
+      <div class="box note">
+        <div class="box-t">Stessi tre puntini, due significati opposti</div>
+        <p>Nella sezione 03 vedrai gli stessi <code>...</code> usati per <em>espandere</em> un array. Qui invece <em>raccolgono</em>. Come distinguerli: a sinistra dell'uguale raccolgono (rest), a destra espandono (spread).</p>
+      </div>
+
+      <h2>Valori di default</h2>
+      <p>Se l'array è più corto dello schema, gli elementi mancanti valgono <code>undefined</code>. Puoi dare un valore di riserva con l'uguale:</p>
+
+      <div class="lab">
+        <div class="lab-bar">
+          <span>Quando manca un valore</span>
+          <span class="lab-acts">
+            <button class="btn btn-run" data-run>Esegui ▸</button>
+            <button class="btn" data-reset>Ripristina</button>
+          </span>
+        </div>
+        <textarea spellcheck="false">function bar() {
+  return [1, 2]
+}
+
+const [r, s, t] = bar()
+console.log("senza default:", r, s, t)
+
+const [u, v, w = 3] = bar()
+console.log("con default:", u, v, w)</textarea>
+        <div class="lab-out"></div>
+      </div>
+
+      <p>Il default scatta solo quando il valore è <code>undefined</code>. Se l'array contiene <code>null</code> o <code>0</code>, il default <strong>non</strong> scatta: quei valori esistono.</p>
+
+      <h2>Scambio di valori</h2>
+      <p>Un uso classico. Senza destructuring servirebbe una variabile temporanea; qui basta una riga.</p>
+
+      <div class="lab">
+        <div class="lab-bar">
+          <span>Scambio in una riga</span>
+          <span class="lab-acts">
+            <button class="btn btn-run" data-run>Esegui ▸</button>
+            <button class="btn" data-reset>Ripristina</button>
+          </span>
+        </div>
+        <textarea spellcheck="false">let x = 1
+let y = 2
+
+console.log("prima:", x, y)
+
+;[x, y] = [y, x]
+
+console.log("dopo:", x, y)</textarea>
+        <div class="lab-out"></div>
+      </div>
+
+      <div class="box warn">
+        <div class="box-t">Il punto e virgola davanti</div>
+        <p>Nota il <code>;</code> prima della parentesi quadra. Serve perché la riga inizia con <code>[</code>: senza, JavaScript prova a leggerla come continuazione della riga precedente e sbaglia. Se dichiari le variabili con <code>let</code> e le scambi su righe separate, mettilo sempre.</p>
+      </div>
+
+      <h2>Con le funzioni</h2>
+      <p>Una funzione JavaScript restituisce un solo valore. Restituendo un array e destrutturandolo in ingresso ottieni l'effetto di più valori di ritorno:</p>
+
+      <pre><code>function dividi(a, b) {
+  return [Math.floor(a / b), a % b]
+}
+
+const [quoziente, resto] = dividi(17, 5)
+console.log(quoziente, resto)   // 3 2</code></pre>
+    </section>
+
+    <!-- ============ 2 ============ -->
+    <section class="pane">
+      <div class="eyebrow">Sezione 02</div>
+      <h1>Destructuring di oggetti</h1>
+      <p class="lead">Uguale a quello degli array, ma i valori si prendono per <strong>nome</strong>, non per posizione. È la forma che userai di più.</p>
+
+      <h2>Da così a così</h2>
+      <p>La versione classica ripete il nome dell'oggetto a ogni riga:</p>
+
+      <pre><code>const obj = { nome: "Mario", cognome: "Rossi", eta: 30 }
+const nome = obj.nome
+const cognome = obj.cognome
+const eta = obj.eta</code></pre>
+
+      <p>La versione con destructuring usa le graffe:</p>
+
+      <pre><code>const { nome, cognome, eta } = obj</code></pre>
+
+      <div class="box warn">
+        <div class="box-t">Il nome deve coincidere</div>
+        <p>Negli array conta la posizione, negli oggetti conta il nome. <code>const { nome } = obj</code> funziona solo se la proprietà si chiama esattamente <code>nome</code>. Se sbagli una lettera non ottieni un errore: ottieni <code>undefined</code>, che è peggio perché scopri il problema più tardi.</p>
+      </div>
+
+      <div class="lab">
+        <div class="lab-bar">
+          <span>Prova a sbagliare un nome</span>
+          <span class="lab-acts">
+            <button class="btn btn-run" data-run>Esegui ▸</button>
+            <button class="btn" data-reset>Ripristina</button>
+          </span>
+        </div>
+        <textarea spellcheck="false">const obj = { nome: "Mario", cognome: "Rossi", eta: 30 }
+
+const { nome, cognome, eta } = obj
+console.log(nome, cognome, eta)
+
+// ora un nome che non esiste
+const { indirizzo } = obj
+console.log("indirizzo:", indirizzo)</textarea>
+        <div class="lab-out"></div>
+      </div>
+
+      <h2>L'ordine non conta</h2>
+      <p>Siccome si va per nome, puoi scrivere le proprietà nell'ordine che vuoi e puoi prenderne solo alcune:</p>
+
+      <div class="lab">
+        <div class="lab-bar">
+          <span>Ordine libero, selezione libera</span>
+          <span class="lab-acts">
+            <button class="btn btn-run" data-run>Esegui ▸</button>
+            <button class="btn" data-reset>Ripristina</button>
+          </span>
+        </div>
+        <textarea spellcheck="false">const studente = { nome: "Mario", cognome: "Rossi", eta: 18 }
+
+const { eta, nome } = studente
+console.log(eta, nome)</textarea>
+        <div class="lab-out"></div>
+      </div>
+
+      <p class="origin">L'estrazione di <code>nome</code> ed <code>eta</code> da un oggetto studente riprende l'esercizio 4 dell'esercitazione di laboratorio, non il libro.</p>
+
+      <h2>Valori di default</h2>
+      <p>Come per gli array, l'uguale dà un valore di riserva quando la proprietà non c'è.</p>
+
+      <div class="lab">
+        <div class="lab-bar">
+          <span>Proprietà mancante</span>
+          <span class="lab-acts">
+            <button class="btn btn-run" data-run>Esegui ▸</button>
+            <button class="btn" data-reset>Ripristina</button>
+          </span>
+        </div>
+        <textarea spellcheck="false">const obj = { nome: "Mario", cognome: "Rossi", eta: 30 }
+
+const { nome, professione = "medico" } = obj
+console.log(nome, professione)
+
+const obj2 = { nome: "Anna", professione: "ingegnere" }
+const { professione: prof2 = "medico" } = obj2
+console.log(prof2)</textarea>
+        <div class="lab-out"></div>
+      </div>
+
+      <p>L'ultima riga mostra anche come <strong>rinominare</strong>: <code>professione: prof2</code> significa "prendi la proprietà <code>professione</code> e chiamala <code>prof2</code>". Serve quando il nome che arriva dai dati fa a pugni con una variabile che hai già.</p>
+
+      <h2>Dove lo userai davvero: i parametri</h2>
+      <p>Questa è la parte da ricordare. Il destructuring funziona anche <em>nella lista dei parametri</em> di una funzione. Invece di ricevere un oggetto e poi frugarci dentro, lo apri direttamente all'ingresso.</p>
+
+      <div class="lab">
+        <div class="lab-bar">
+          <span>Destructuring nei parametri</span>
+          <span class="lab-acts">
+            <button class="btn btn-run" data-run>Esegui ▸</button>
+            <button class="btn" data-reset>Ripristina</button>
+          </span>
+        </div>
+        <textarea spellcheck="false">// senza destructuring
+function schedaA(dati) {
+  return dati.titolo + " - " + dati.autore
+}
+
+// con destructuring nei parametri
+function schedaB({ titolo, autore }) {
+  return titolo + " - " + autore
+}
+
+const libro = { titolo: "Il deserto dei Tartari", autore: "Buzzati", anno: 1940 }
+
+console.log(schedaA(libro))
+console.log(schedaB(libro))</textarea>
+        <div class="lab-out"></div>
+      </div>
+
+      <div class="box tip">
+        <div class="box-t">Anticipazione: settimana 7</div>
+        <p>In React ogni componente è una funzione che riceve un oggetto di dati. Nella pratica non lo si riceve mai intero: si destruttura nei parametri, esattamente come <code>schedaB</code>.</p>
+        <pre><code>function Card({ titolo, autore }) {
+  return &lt;h2&gt;{titolo}&lt;/h2&gt;
+}</code></pre>
+        <p>Quelle graffe attorno a <code>titolo</code> nei parametri sono <strong>questa</strong> cosa, non una novità di React. Se le riconosci adesso, tra quattro settimane leggerai il codice React senza inciampare.</p>
+      </div>
+    </section>
+
+    <!-- ============ 3 ============ -->
+    <section class="pane">
+      <div class="eyebrow">Sezione 03</div>
+      <h1>Spread <code>...</code></h1>
+      <p class="lead">Tre puntini che aprono un array o un oggetto e ne versano il contenuto dentro un altro. Con questo costruisci le tre formule della sezione 05.</p>
+
+      <p class="origin">Anche questa sezione viene dai materiali di laboratorio (<code>index07.js</code>, scheda Index.07 del readme). Il libro usa lo spread negli esempi del capitolo 9 ma non lo introduce mai come argomento.</p>
+
+      <h2>Concatenare due array</h2>
+      <p><code>...arrayA</code> significa "qui dentro metti gli elementi di <code>arrayA</code>, uno per uno".</p>
+
+      <div class="lab">
+        <div class="lab-bar">
+          <span>Concatenazione</span>
+          <span class="lab-acts">
+            <button class="btn btn-run" data-run>Esegui ▸</button>
+            <button class="btn" data-reset>Ripristina</button>
+          </span>
+        </div>
+        <textarea spellcheck="false">const arrayA = [1, 2, 3]
+const arrayB = [4, 5, 6]
+
+const arrayC = [...arrayA, ...arrayB]
+console.log(arrayC)
+
+// senza i puntini: array dentro array
+const sbagliato = [arrayA, arrayB]
+console.log(sbagliato)</textarea>
+        <div class="lab-out"></div>
+      </div>
+
+      <p>Guarda bene i due output. Nel primo hai sei numeri, nel secondo due array annidati. I puntini sono la differenza tra versare il contenuto e appoggiare il contenitore.</p>
+
+      <h2>Aggiungere elementi</h2>
+      <p>Puoi mescolare elementi sparsi e array espansi, in qualunque posizione:</p>
+
+      <div class="lab">
+        <div class="lab-bar">
+          <span>In coda, in testa, in mezzo</span>
+          <span class="lab-acts">
+            <button class="btn btn-run" data-run>Esegui ▸</button>
+            <button class="btn" data-reset>Ripristina</button>
+          </span>
+        </div>
+        <textarea spellcheck="false">const frutti = ["mela", "banana", "arancia"]
+
+console.log([...frutti, "pera"])
+console.log(["pera", ...frutti])
+console.log([frutti[0], "kiwi", ...frutti.slice(1)])
+
+// e l'originale?
+console.log("originale:", frutti)</textarea>
+        <div class="lab-out"></div>
+      </div>
+
+      <p>L'ultima riga è quella che conta: <code>frutti</code> non è cambiato. Lo spread <strong>legge</strong> e basta.</p>
+
+      <h2>Clonare</h2>
+      <p>Uno spread da solo, senza aggiunte, produce una copia:</p>
+
+      <pre><code>const copia = [...originale]      // array
+const copiaObj = { ...oggetto }   // oggetto</code></pre>
+
+      <h2>Unire oggetti: vince l'ultimo</h2>
+      <p>Con gli oggetti lo spread copia le proprietà. Se la stessa proprietà compare due volte, <strong>rimane il valore di destra</strong>: l'ultimo scritto sovrascrive i precedenti.</p>
+
+      <div class="lab">
+        <div class="lab-bar">
+          <span>Sovrascrittura</span>
+          <span class="lab-acts">
+            <button class="btn btn-run" data-run>Esegui ▸</button>
+            <button class="btn" data-reset>Ripristina</button>
+          </span>
+        </div>
+        <textarea spellcheck="false">const objA = { a: 1, b: 2 }
+const objB = { b: 99, c: 3 }
+
+console.log({ ...objA, ...objB })
+console.log({ ...objB, ...objA })
+
+// il caso più utile: copio tutto e cambio una cosa sola
+const utente = { nome: "Anna", ruolo: "studente", attivo: false }
+console.log({ ...utente, attivo: true })</textarea>
+        <div class="lab-out"></div>
+      </div>
+
+      <div class="box tip">
+        <div class="box-t">Questa riga vale oro</div>
+        <p><code>{ ...utente, attivo: true }</code> significa: nuovo oggetto identico a <code>utente</code>, tranne <code>attivo</code> che vale <code>true</code>. È la terza delle tre manipolazioni immutabili, già quasi completa. La ritrovi nella sezione 05.</p>
+        <p>La proprietà che vuoi cambiare va scritta <strong>dopo</strong> lo spread. Se la scrivi prima, lo spread la sovrascrive di nuovo con il valore vecchio e il tuo cambiamento sparisce senza errori.</p>
+      </div>
+
+      <h2>Espandere gli argomenti di una funzione</h2>
+      <p>Lo spread funziona anche su una chiamata: apre l'array e passa gli elementi come argomenti separati.</p>
+
+      <div class="lab">
+        <div class="lab-bar">
+          <span>Da array ad argomenti</span>
+          <span class="lab-acts">
+            <button class="btn btn-run" data-run>Esegui ▸</button>
+            <button class="btn" data-reset>Ripristina</button>
+          </span>
+        </div>
+        <textarea spellcheck="false">const sum = (a, b, c) => a + b + c
+const numeri = [1, 2, 3]
+
+console.log(sum(...numeri))
+console.log(Math.max(...[4, 19, 7, 12]))
+
+// il verso opposto: rest raccoglie
+const somma = (...valori) => valori.reduce((acc, n) => acc + n, 0)
+console.log(somma(1, 2, 3, 4))</textarea>
+        <div class="lab-out"></div>
+      </div>
+
+      <p class="origin">La funzione a numero variabile di argomenti con <code>reduce</code> è la soluzione dell'esercizio 5 dell'esercitazione di laboratorio.</p>
+
+      <h2>Riepilogo</h2>
+      <div class="tbl-scroll">
+      <table>
+        <tr><th style="width:34%">Scrittura</th><th>Che cosa fa</th></tr>
+        <tr><td><code>[...a, ...b]</code></td><td>Nuovo array con gli elementi di <code>a</code> seguiti da quelli di <code>b</code></td></tr>
+        <tr><td><code>[...a, nuovo]</code></td><td>Nuovo array con un elemento in più in coda</td></tr>
+        <tr><td><code>[...a]</code></td><td>Copia dell'array</td></tr>
+        <tr><td><code>{ ...o1, ...o2 }</code></td><td>Unione: sulle proprietà in comune vince <code>o2</code></td></tr>
+        <tr><td><code>{ ...o, x: 1 }</code></td><td>Copia dell'oggetto con la sola proprietà <code>x</code> cambiata</td></tr>
+        <tr><td><code>f(...a)</code></td><td>Chiama <code>f</code> passando gli elementi di <code>a</code> come argomenti separati</td></tr>
+      </table>
+      </div>
+    </section>
+
+    <!-- ============ 4 ============ -->
+    <section class="pane">
+      <div class="eyebrow">Sezione 04</div>
+      <h1>Valori, riferimenti e shallow copy</h1>
+      <p class="lead">Qui si chiude il conto lasciato aperto nella settimana 1: perché <code>const</code> non blocca il contenuto di un array. E si apre il problema più insidioso dello spread.</p>
+
+      <h2>Due modi di conservare un dato</h2>
+      <p>JavaScript tratta i dati in due modi diversi a seconda del tipo.</p>
+
+      <div class="tbl-scroll">
+      <table>
+        <tr><th style="width:32%">Tipo</th><th>Come viene conservato</th></tr>
+        <tr><td>number, string, boolean, null, undefined</td><td><strong>Per valore</strong>: la variabile contiene il dato</td></tr>
+        <tr><td>array, oggetti, funzioni</td><td><strong>Per riferimento</strong>: la variabile contiene un indirizzo che punta al dato</td></tr>
+      </table>
+      </div>
+
+      <p>Immagina un armadietto. Con i numeri, il numero è dentro l'armadietto. Con gli array, nell'armadietto c'è un foglietto con scritto dove sta l'array.</p>
+
+      <div class="lab">
+        <div class="lab-bar">
+          <span>Copia per valore</span>
+          <span class="lab-acts">
+            <button class="btn btn-run" data-run>Esegui ▸</button>
+            <button class="btn" data-reset>Ripristina</button>
+          </span>
+        </div>
+        <textarea spellcheck="false">let a = 10
+let b = a
+b = 99
+
+console.log("a vale", a)
+console.log("b vale", b)</textarea>
+        <div class="lab-out"></div>
+      </div>
+
+      <p><code>a</code> è rimasto 10: la copia era una copia vera. Ora la stessa cosa con un array.</p>
+
+      <div class="lab">
+        <div class="lab-bar">
+          <span>Copia per riferimento</span>
+          <span class="lab-acts">
+            <button class="btn btn-run" data-run>Esegui ▸</button>
+            <button class="btn" data-reset>Ripristina</button>
+          </span>
+        </div>
+        <textarea spellcheck="false">const lista1 = [1, 2, 3]
+const lista2 = lista1
+
+lista2.push(99)
+
+console.log("lista1:", lista1)
+console.log("lista2:", lista2)
+console.log("sono lo stesso array?", lista1 === lista2)</textarea>
+        <div class="lab-out"></div>
+      </div>
+
+      <p>Non ci sono due array. Ce n'è uno solo con due nomi. <code>lista1 === lista2</code> dà <code>true</code> perché il confronto tra oggetti guarda l'indirizzo, non il contenuto.</p>
+
+      <div class="box note">
+        <div class="box-t">Ecco perché const non basta</div>
+        <p>Nella settimana 1 avevi visto che <code>const colori = [...]</code> permette comunque <code>colori.push("blu")</code>. Adesso hai la spiegazione: <code>const</code> blocca il <em>foglietto</em> dentro l'armadietto, cioè l'indirizzo. Non blocca l'array che sta all'indirizzo.</p>
+        <p>Riassegnare significa cambiare foglietto ed è vietato. Modificare il contenuto è permesso, perché il foglietto resta identico.</p>
+      </div>
+
+      <h2>Confrontare due array</h2>
+      <p>Conseguenza diretta, e sorprendente la prima volta:</p>
+
+      <div class="lab">
+        <div class="lab-bar">
+          <span>Prevedi il risultato</span>
+          <span class="lab-acts">
+            <button class="btn btn-run" data-run>Esegui ▸</button>
+            <button class="btn" data-reset>Ripristina</button>
+          </span>
+        </div>
+        <textarea spellcheck="false">console.log([1, 2] === [1, 2])
+console.log({ a: 1 } === { a: 1 })
+
+const x = [1, 2]
+const y = x
+console.log(x === y)</textarea>
+        <div class="lab-out"></div>
+      </div>
+
+      <p>I primi due danno <code>false</code>: stesso contenuto, indirizzi diversi. È proprio su questo confronto che React decide se ridisegnare, ed è per questo che devi produrre un array nuovo a ogni modifica.</p>
+
+      <h2>Lo shallow copy dello spread</h2>
+      <p>Adesso il punto delicato. Lo spread crea sì un array nuovo, ma copia solo il <strong>primo livello</strong>. Se dentro ci sono altri array o oggetti, quelli non vengono duplicati: ne vengono copiati gli indirizzi.</p>
+      <p>Si chiama <strong>copia superficiale</strong>, o <em>shallow copy</em>.</p>
+
+      <div class="lab">
+        <div class="lab-bar">
+          <span>Primo livello: tutto bene</span>
+          <span class="lab-acts">
+            <button class="btn btn-run" data-run>Esegui ▸</button>
+            <button class="btn" data-reset>Ripristina</button>
+          </span>
+        </div>
+        <textarea spellcheck="false">const arrayA = [1, 2, 3]
+const arrayB = [...arrayA]
+
+arrayB.push(99)
+
+console.log("arrayA:", arrayA)
+console.log("arrayB:", arrayB)</textarea>
+        <div class="lab-out"></div>
+      </div>
+
+      <p>Qui funziona: due array separati, l'originale intatto. Ora la stessa identica operazione, ma con un array annidato dentro.</p>
+
+      <div class="lab">
+        <div class="lab-bar">
+          <span>Secondo livello: il problema</span>
+          <span class="lab-acts">
+            <button class="btn btn-run" data-run>Esegui ▸</button>
+            <button class="btn" data-reset>Ripristina</button>
+          </span>
+        </div>
+        <textarea spellcheck="false">const originalArray = [[1, 2, 3, 4], 12]
+const copiedArray = [...originalArray]
+
+copiedArray[0].push(99)
+
+console.log("originale:", originalArray)
+console.log("copia:", copiedArray)</textarea>
+        <div class="lab-out"></div>
+      </div>
+
+      <div class="box warn">
+        <div class="box-t">Sono cambiati tutti e due</div>
+        <p>Hai modificato solo <code>copiedArray</code>, ma l'output mostra il <code>99</code> in entrambi. Il motivo: lo spread ha copiato due caselle, e nella prima c'era l'<em>indirizzo</em> dell'array interno. Quell'array interno è rimasto uno solo, condiviso.</p>
+        <p>Questo è un bug vero, di quelli che in React ti fanno perdere un pomeriggio. Il dato cambia dove non te lo aspetti e nessun messaggio di errore te lo segnala.</p>
+      </div>
+
+      <p class="origin">L'esempio dell'array annidato è preso alla lettera da <code>index07.js</code> dei materiali di laboratorio, sezione "L'operatore spread e lo shallow copy". Il libro non affronta questo problema.</p>
+
+      <h2>Come ci si difende</h2>
+      <p>Tre regole, in ordine di importanza.</p>
+
+      <ol>
+        <li><strong>Tieni i dati piatti.</strong> Un array di oggetti semplici, senza array dentro oggetti dentro array. Il 90% dei problemi non nasce proprio.</li>
+        <li><strong>Se devi modificare un livello interno, spread anche lì.</strong> Uno per ogni livello che tocchi.</li>
+        <li><strong>Per una copia profonda vera</strong> esiste <code>structuredClone(oggetto)</code>, disponibile nei browser recenti. Copia tutto a ogni livello. Costa di più: usalo solo se serve davvero.</li>
+      </ol>
+
+      <div class="lab">
+        <div class="lab-bar">
+          <span>Spread a due livelli</span>
+          <span class="lab-acts">
+            <button class="btn btn-run" data-run>Esegui ▸</button>
+            <button class="btn" data-reset>Ripristina</button>
+          </span>
+        </div>
+        <textarea spellcheck="false">const originale = [[1, 2, 3, 4], 12]
+
+// spread sul primo livello, spread anche sull'elemento interno
+const copia = [[...originale[0], 99], originale[1]]
+
+console.log("originale:", originale)
+console.log("copia:", copia)
+
+// oppure la copia profonda
+const profonda = structuredClone(originale)
+profonda[0].push(77)
+console.log("originale dopo:", originale)
+console.log("profonda:", profonda)</textarea>
+        <div class="lab-out"></div>
+      </div>
+    </section>
+
+    <!-- ============ 5 ============ -->
+    <section class="pane">
+      <div class="eyebrow">Sezione 05 · il cuore della settimana</div>
+      <h1>Le tre manipolazioni immutabili</h1>
+      <p class="lead">Aggiungere, rimuovere, modificare. Tre formule. Imparale a memoria: sono il 90% del codice che scriverai in React.</p>
+
+      <div class="box tip">
+        <div class="box-t">Che cosa si intende per immutabile</div>
+        <p>Non significa che i dati non cambiano mai. Significa che non modifichi il dato esistente: ne produci uno <strong>nuovo</strong> e sostituisci il vecchio. Il vecchio non lo tocca nessuno.</p>
+      </div>
+
+      <h2>La lista di partenza</h2>
+      <p>Tutti gli esempi lavorano su questo array di task. È la struttura tipica: un array di oggetti, ognuno con un <code>id</code> univoco.</p>
+
+      <pre><code>const task = [
+  { id: 1, testo: "Studiare", fatto: false },
+  { id: 2, testo: "Allenarsi", fatto: false },
+  { id: 3, testo: "Leggere",   fatto: true  }
+]</code></pre>
+
+      <h2>Uno · aggiungere</h2>
+
+      <pre><code>[...lista, nuovo]</code></pre>
+
+      <p>Nuovo array: prima tutti gli elementi vecchi, poi quello nuovo in coda.</p>
+
+      <div class="lab">
+        <div class="lab-bar">
+          <span>Aggiungere: giusto contro sbagliato</span>
+          <span class="lab-acts">
+            <button class="btn btn-run" data-run>Esegui ▸</button>
+            <button class="btn" data-reset>Ripristina</button>
+          </span>
+        </div>
+        <textarea spellcheck="false">const task = [
+  { id: 1, testo: "Studiare", fatto: false },
+  { id: 2, testo: "Allenarsi", fatto: false }
+]
+
+const nuovo = { id: 3, testo: "Leggere", fatto: false }
+
+// GIUSTO: array nuovo
+const dopo = [...task, nuovo]
+console.log("lunghezza originale:", task.length)
+console.log("lunghezza nuovo:", dopo.length)
+console.log("stesso array?", task === dopo)
+
+// SBAGLIATO: modifica quello che c'e' gia'
+const altra = [
+  { id: 1, testo: "Studiare", fatto: false }
+]
+const rif = altra
+rif.push(nuovo)
+console.log("originale dopo push:", altra.length)
+console.log("stesso array?", altra === rif)</textarea>
+        <div class="lab-out"></div>
+      </div>
+
+      <div class="box warn">
+        <div class="box-t">Perché push è sbagliato in React</div>
+        <p><code>lista.push(nuovo)</code> funziona: l'elemento entra davvero. Ma l'array resta lo stesso oggetto, quindi <code>vecchio === nuovo</code> dà <code>true</code>. React confronta, non vede differenze e non ridisegna. Dato aggiornato, schermo fermo.</p>
+        <p>Stessa storia per <code>splice</code>, <code>sort</code>, <code>reverse</code>, <code>pop</code>: modificano l'array esistente. Evitali tutti.</p>
+      </div>
+
+      <h2>Due · rimuovere</h2>
+
+      <pre><code>lista.filter(x =&gt; x.id !== id)</code></pre>
+
+      <p>Nuovo array con tutti gli elementi <em>tranne</em> quello con l'id indicato. Leggilo così: "tieni tutti quelli il cui id è diverso da quello che voglio togliere".</p>
+
+      <div class="lab">
+        <div class="lab-bar">
+          <span>Rimuovere: giusto contro sbagliato</span>
+          <span class="lab-acts">
+            <button class="btn btn-run" data-run>Esegui ▸</button>
+            <button class="btn" data-reset>Ripristina</button>
+          </span>
+        </div>
+        <textarea spellcheck="false">const task = [
+  { id: 1, testo: "Studiare", fatto: false },
+  { id: 2, testo: "Allenarsi", fatto: false },
+  { id: 3, testo: "Leggere", fatto: true }
+]
+
+// GIUSTO
+const senzaDue = task.filter(t => t.id !== 2)
+console.log("risultato:", senzaDue.map(t => t.testo))
+console.log("originale intatto:", task.map(t => t.testo))
+console.log("stesso array?", task === senzaDue)
+
+// SBAGLIATO: splice taglia l'array esistente
+const copia = [
+  { id: 1, testo: "Studiare" },
+  { id: 2, testo: "Allenarsi" }
+]
+const alias = copia
+alias.splice(1, 1)
+console.log("dopo splice:", copia.map(t => t.testo))
+console.log("stesso array?", copia === alias)</textarea>
+        <div class="lab-out"></div>
+      </div>
+
+      <div class="box note">
+        <div class="box-t">Attenzione al verso del confronto</div>
+        <p>Si scrive <code>!==</code>, non <code>===</code>. Con <code>===</code> ottieni l'effetto opposto: tieni solo l'elemento che volevi togliere. È lo scambio più frequente. Se la lista si svuota quasi tutta, hai sbagliato il verso.</p>
+      </div>
+
+      <h2>Tre · modificare</h2>
+
+      <pre><code>lista.map(x =&gt; x.id === id ? {...x, fatto: true} : x)</code></pre>
+
+      <p>La più densa delle tre. Si legge in tre pezzi:</p>
+
+      <ul>
+        <li><code>lista.map(x =&gt; ...)</code> — scorri tutti gli elementi e ne produci uno nuovo per ciascuno</li>
+        <li><code>x.id === id ? A : B</code> — se è l'elemento che cerchi restituisci <code>A</code>, altrimenti restituisci <code>x</code> com'è</li>
+        <li><code>{...x, fatto: true}</code> — <code>A</code> è una copia dell'oggetto con la sola proprietà <code>fatto</code> cambiata</li>
+      </ul>
+
+      <p>Nota il ramo <code>: x</code> alla fine. Gli elementi che non ti interessano vanno restituiti tali e quali. Se lo dimentichi, <code>map</code> mette <code>undefined</code> al loro posto e la lista si riempie di buchi.</p>
+
+      <div class="lab">
+        <div class="lab-bar">
+          <span>Modificare: giusto contro sbagliato</span>
+          <span class="lab-acts">
+            <button class="btn btn-run" data-run>Esegui ▸</button>
+            <button class="btn" data-reset>Ripristina</button>
+          </span>
+        </div>
+        <textarea spellcheck="false">const task = [
+  { id: 1, testo: "Studiare", fatto: false },
+  { id: 2, testo: "Allenarsi", fatto: false },
+  { id: 3, testo: "Leggere", fatto: true }
+]
+
+// GIUSTO
+const aggiornati = task.map(t => t.id === 2 ? { ...t, fatto: true } : t)
+console.log("nuovo:", aggiornati)
+console.log("originale:", task)
+
+// SBAGLIATO: assegnazione diretta sull'oggetto
+const altri = [
+  { id: 1, testo: "Studiare", fatto: false }
+]
+const alias = altri
+alias[0].fatto = true
+console.log("originale modificato:", altri)</textarea>
+        <div class="lab-out"></div>
+      </div>
+
+      <div class="box warn">
+        <div class="box-t">Il doppio livello</div>
+        <p>Modificare vuol dire produrre due cose nuove: un array nuovo (lo fa <code>map</code>) <strong>e</strong> un oggetto nuovo per l'elemento che cambia (lo fa <code>{...x, ...}</code>).</p>
+        <p>Se scrivi <code>task.map(t =&gt; { if (t.id === 2) t.fatto = true; return t })</code> ottieni sì un array nuovo, ma gli oggetti dentro sono gli stessi di prima e uno l'hai modificato. Metà lavoro fatto, bug garantito.</p>
+      </div>
+
+      <h2>Le tre formule insieme</h2>
+
+      <div class="tbl-scroll">
+      <table>
+        <tr><th style="width:22%">Voglio</th><th style="width:44%">Formula immutabile</th><th>Da non usare</th></tr>
+        <tr>
+          <td>Aggiungere</td>
+          <td><code>[...lista, nuovo]</code></td>
+          <td><code>lista.push(nuovo)</code></td>
+        </tr>
+        <tr>
+          <td>Rimuovere</td>
+          <td><code>lista.filter(x =&gt; x.id !== id)</code></td>
+          <td><code>lista.splice(i, 1)</code></td>
+        </tr>
+        <tr>
+          <td>Modificare</td>
+          <td><code>lista.map(x =&gt; x.id === id ? {...x, fatto: true} : x)</code></td>
+          <td><code>lista[i].fatto = true</code></td>
+        </tr>
+      </table>
+      </div>
+
+      <div class="box tip">
+        <div class="box-t">Anticipazione: settimana 8</div>
+        <p>In React lo stato si aggiorna con una funzione, per esempio <code>setTask(...)</code>. Quello che ci metti dentro sono <strong>esattamente</strong> queste tre righe:</p>
+        <pre><code>setTask([...task, nuovo])
+setTask(task.filter(t =&gt; t.id !== id))
+setTask(task.map(t =&gt; t.id === id ? { ...t, fatto: !t.fatto } : t))</code></pre>
+        <p>Non c'è niente in più da imparare. Cambia solo il <code>setTask(</code> attorno. Se oggi le scrivi senza guardare, la settimana 8 la affronti già mezza fatta.</p>
+      </div>
+
+      <h2>Scrivile da solo</h2>
+      <p>Ultima cosa prima degli esercizi. Il riquadro qui sotto è vuoto: riscrivi le tre formule senza tornare indietro a copiarle, poi esegui e verifica che facciano quello che dici.</p>
+
+      <div class="lab">
+        <div class="lab-bar">
+          <span>A memoria</span>
+          <span class="lab-acts">
+            <button class="btn btn-run" data-run>Esegui ▸</button>
+            <button class="btn" data-reset>Ripristina</button>
+          </span>
+        </div>
+        <textarea spellcheck="false">const lista = [
+  { id: 1, testo: "Studiare", fatto: false },
+  { id: 2, testo: "Allenarsi", fatto: false }
+]
+
+// 1. aggiungi { id: 3, testo: "Leggere", fatto: false }
+
+
+// 2. rimuovi quello con id 1
+
+
+// 3. metti fatto: true su quello con id 2
+
+</textarea>
+        <div class="lab-out"></div>
+      </div>
+    </section>
+
+    <!-- ============ 6 ============ -->
+    <section class="pane">
+      <div class="eyebrow">Sezione 06 · primo giorno</div>
+      <h1>Officina · esercizi 1–4</h1>
+      <p class="lead">Da qui lavori tu. Ognuno ha un aiuto e una soluzione: apri l'aiuto solo se sei bloccato da qualche minuto, la soluzione solo dopo aver provato.</p>
+
+      <div class="box note">
+        <div class="box-t">Come si lavora</div>
+        <p>Scrivi il codice nel riquadro dell'esercizio ed esegui. Se il risultato non è quello atteso, stampa anche l'array originale: metà degli errori di oggi si vedono solo confrontando prima e dopo.</p>
+        <p>Oggi arrivi fino all'esercizio 4. Gli ultimi tre sono per la prossima ora. Se finisci prima, vai pure avanti.</p>
+      </div>
+
+      <!-- ES 1 -->
+      <div class="ex">
+        <div class="ex-h">
+          <span class="ex-n">Es 1</span>
+          <p class="ex-t">Destructuring di array</p>
+          <span class="ex-lvl">base</span>
+        </div>
+        <p>Parti dall'array <code>[10, 20, 30, 40, 50]</code>.</p>
+        <ul>
+          <li>Estrai il primo e il terzo elemento saltando gli altri, e stampali</li>
+          <li>Estrai il primo elemento e metti tutto il resto in una variabile <code>coda</code></li>
+          <li>Estrai sei elementi: il sesto deve valere <code>0</code> se manca</li>
+        </ul>
+
+        <div class="lab">
+          <div class="lab-bar">
+            <span>Il tuo codice</span>
+            <span class="lab-acts">
+              <button class="btn btn-run" data-run>Esegui ▸</button>
+              <button class="btn" data-reset>Ripristina</button>
+            </span>
+          </div>
+          <textarea spellcheck="false">const numeri = [10, 20, 30, 40, 50]
+
+// 1.
+
+// 2.
+
+// 3.
+</textarea>
+          <div class="lab-out"></div>
+        </div>
+
+        <div class="reveal">
+          <button class="reveal-btn">Aiuto</button>
+          <button class="reveal-btn">Soluzione</button>
+          <div class="reveal-body">
+            <p>Per saltare una posizione lascia il posto vuoto tra due virgole. Per raccogliere il resto usa i tre puntini, e ricorda che vanno per forza in ultima posizione.</p>
+            <p>Il valore di riserva si scrive con l'uguale dentro le parentesi quadre.</p>
+          </div>
+          <div class="reveal-body">
+<pre><code>const numeri = [10, 20, 30, 40, 50]
+
+// 1. la virgola vuota consuma la posizione di 20
+const [primo, , terzo] = numeri
+console.log(primo, terzo)          // 10 30
+
+// 2. rest: raccoglie tutto quello che avanza
+const [testa, ...coda] = numeri
+console.log(testa, coda)           // 10 [20, 30, 40, 50]
+
+// 3. il sesto non esiste, quindi scatta il default
+const [a, b, c, d, e, f = 0] = numeri
+console.log(f)                     // 0</code></pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- ES 2 -->
+      <div class="ex">
+        <div class="ex-h">
+          <span class="ex-n">Es 2</span>
+          <p class="ex-t">Scheda studente</p>
+          <span class="ex-lvl">base</span>
+        </div>
+        <p>Dato l'oggetto <code>{ nome: "Mario", cognome: "Rossi", eta: 18 }</code>, scrivi una funzione <code>scheda</code> che riceve l'oggetto e restituisce la stringa <code>Mario Rossi, 18 anni</code>.</p>
+        <p>Usa il destructuring <strong>nei parametri</strong> della funzione. Aggiungi un valore di default: se manca <code>eta</code>, scrivi <code>età non nota</code> al posto del numero.</p>
+
+        <div class="lab">
+          <div class="lab-bar">
+            <span>Il tuo codice</span>
+            <span class="lab-acts">
+              <button class="btn btn-run" data-run>Esegui ▸</button>
+              <button class="btn" data-reset>Ripristina</button>
+            </span>
+          </div>
+          <textarea spellcheck="false">const studente = { nome: "Mario", cognome: "Rossi", eta: 18 }
+const anonimo = { nome: "Anna", cognome: "Bianchi" }
+
+// scrivi qui scheda
+
+</textarea>
+          <div class="lab-out"></div>
+        </div>
+
+        <div class="reveal">
+          <button class="reveal-btn">Aiuto</button>
+          <button class="reveal-btn">Soluzione</button>
+          <div class="reveal-body">
+            <p>Le graffe vanno dentro le parentesi tonde dei parametri: <code>function scheda({ nome, cognome })</code>.</p>
+            <p>Per il default, l'uguale si scrive dentro le graffe accanto al nome della proprietà. Poi ti serve un template literal per comporre la frase.</p>
+          </div>
+          <div class="reveal-body">
+<pre><code>// il destructuring sta nei parametri: la funzione
+// riceve l'oggetto intero ma lavora sui singoli campi
+const scheda = ({ nome, cognome, eta = "età non nota" }) =&gt;
+  `${nome} ${cognome}, ${eta}${typeof eta === "number" ? " anni" : ""}`
+
+console.log(scheda(studente))   // Mario Rossi, 18 anni
+console.log(scheda(anonimo))    // Anna Bianchi, età non nota</code></pre>
+            <p>Va bene anche una versione più semplice con due funzioni separate. Il punto dell'esercizio sono le graffe nei parametri: è la forma che userai in ogni componente React.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ES 3 -->
+      <div class="ex">
+        <div class="ex-h">
+          <span class="ex-n">Es 3</span>
+          <p class="ex-t">Spread su array</p>
+          <span class="ex-lvl">base</span>
+        </div>
+        <p>Dato <code>frutti = ["mela", "banana", "arancia"]</code>:</p>
+        <ul>
+          <li>Crea <code>altriFrutti</code> con gli stessi elementi più <code>"pera"</code> in fondo</li>
+          <li>Crea <code>conKiwi</code> con <code>"kiwi"</code> davanti a tutti</li>
+          <li>Stampa <code>frutti</code> alla fine e verifica che non sia cambiato</li>
+        </ul>
+
+        <div class="lab">
+          <div class="lab-bar">
+            <span>Il tuo codice</span>
+            <span class="lab-acts">
+              <button class="btn btn-run" data-run>Esegui ▸</button>
+              <button class="btn" data-reset>Ripristina</button>
+            </span>
+          </div>
+          <textarea spellcheck="false">const frutti = ["mela", "banana", "arancia"]
+
+</textarea>
+          <div class="lab-out"></div>
+        </div>
+
+        <div class="reveal">
+          <button class="reveal-btn">Aiuto</button>
+          <button class="reveal-btn">Soluzione</button>
+          <div class="reveal-body">
+            <p>La posizione dei tre puntini dentro le quadre decide dove finiscono gli elementi vecchi. Quello che scrivi prima dei puntini va prima, quello che scrivi dopo va dopo.</p>
+          </div>
+          <div class="reveal-body">
+<pre><code>const frutti = ["mela", "banana", "arancia"]
+
+const altriFrutti = [...frutti, "pera"]
+const conKiwi = ["kiwi", ...frutti]
+
+console.log(altriFrutti)   // mela, banana, arancia, pera
+console.log(conKiwi)       // kiwi, mela, banana, arancia
+console.log(frutti)        // mela, banana, arancia — intatto</code></pre>
+            <p>Nessuna delle due operazioni ha toccato <code>frutti</code>. Con <code>frutti.push("pera")</code> l'originale sarebbe cambiato.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ES 4 -->
+      <div class="ex">
+        <div class="ex-h">
+          <span class="ex-n">Es 4</span>
+          <p class="ex-t">Aggiornare un oggetto senza toccarlo</p>
+          <span class="ex-lvl">intermedio</span>
+        </div>
+        <p>Dato <code>const utente = { nome: "Anna", ruolo: "studente", attivo: false }</code>, scrivi una funzione <code>attiva(u)</code> che restituisce un <strong>nuovo</strong> oggetto identico ma con <code>attivo: true</code>.</p>
+        <p>Verifica poi due cose: che l'originale sia ancora <code>attivo: false</code>, e che <code>utente === attiva(utente)</code> dia <code>false</code>.</p>
+
+        <div class="lab">
+          <div class="lab-bar">
+            <span>Il tuo codice</span>
+            <span class="lab-acts">
+              <button class="btn btn-run" data-run>Esegui ▸</button>
+              <button class="btn" data-reset>Ripristina</button>
+            </span>
+          </div>
+          <textarea spellcheck="false">const utente = { nome: "Anna", ruolo: "studente", attivo: false }
+
+// scrivi qui attiva
+
+</textarea>
+          <div class="lab-out"></div>
+        </div>
+
+        <div class="reveal">
+          <button class="reveal-btn">Aiuto</button>
+          <button class="reveal-btn">Soluzione</button>
+          <div class="reveal-body">
+            <p>Ti serve lo spread su oggetto seguito dalla proprietà da cambiare. L'ordine conta: la proprietà nuova va scritta <em>dopo</em> i puntini, altrimenti vince il valore vecchio.</p>
+            <p>Ricorda che una arrow function che restituisce un oggetto letterale ha bisogno delle parentesi tonde attorno alle graffe.</p>
+          </div>
+          <div class="reveal-body">
+<pre><code>const utente = { nome: "Anna", ruolo: "studente", attivo: false }
+
+// le tonde attorno alle graffe dicono "questo e' un oggetto
+// da restituire", non un corpo di funzione
+const attiva = u =&gt; ({ ...u, attivo: true })
+
+const attivato = attiva(utente)
+
+console.log(attivato)              // attivo: true
+console.log(utente)                // attivo: false, intatto
+console.log(utente === attivato)   // false: oggetti diversi</code></pre>
+            <p>Senza le parentesi tonde, <code>u =&gt; { ...u }</code> viene letto come corpo di funzione e ottieni un errore di sintassi. È un inciampo classico.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="box tip">
+        <div class="box-t">Fine delle due ore</div>
+        <p>Gli esercizi 5, 6 e 7 sono nella sezione 08, dopo il riscaldamento. La sezione 09 sui moduli la vedi la prossima volta.</p>
+        <p>Prima di chiudere, torna alla sezione 05 e rileggi le tre formule. Domani si riparte da lì.</p>
+      </div>
+    </section>
+
+    <!-- ============ 7 ============ -->
+    <section class="pane">
+      <div class="eyebrow">Sezione 07 · secondo giorno</div>
+      <h1>Riscaldamento</h1>
+      <p class="lead">Tre micro-attività da cinque minuti l'una per riattivare quello che hai fatto l'altro giorno. Guarda il codice, decidi, poi esegui e verifica.</p>
+
+      <h2>Uno · prevedi il risultato</h2>
+      <p>Prima di eseguire scrivi su un foglio cosa stampano queste quattro righe. Poi esegui e confronta.</p>
+
+      <div class="lab">
+        <div class="lab-bar">
+          <span>Prima prevedi, poi esegui</span>
+          <span class="lab-acts">
+            <button class="btn btn-run" data-run>Esegui ▸</button>
+            <button class="btn" data-reset>Ripristina</button>
+          </span>
+        </div>
+        <textarea spellcheck="false">const a = [1, 2]
+const b = a
+const c = [...a]
+
+b.push(3)
+
+console.log(a)
+console.log(c)
+console.log(a === b)
+console.log(a === c)</textarea>
+        <div class="lab-out"></div>
+      </div>
+
+      <div class="reveal">
+        <button class="reveal-btn">Aiuto</button>
+        <button class="reveal-btn">Soluzione</button>
+        <div class="reveal-body">
+          <p>Una sola riga crea un array nuovo. Le altre assegnazioni copiano un indirizzo. Chiediti: quanti array esistono davvero in memoria?</p>
+        </div>
+        <div class="reveal-body">
+          <p>Gli array in memoria sono due: quello di partenza e la copia fatta con lo spread.</p>
+<pre><code>console.log(a)        // [1, 2, 3] — b e a sono lo stesso array
+console.log(c)        // [1, 2]    — copia fatta prima del push
+console.log(a === b)  // true      — stesso indirizzo
+console.log(a === c)  // false     — array diverso</code></pre>
+        </div>
+      </div>
+
+      <h2>Due · trova l'errore</h2>
+      <p>Questo codice dovrebbe mettere <code>fatto: true</code> sul task con id 2 senza toccare l'originale. Fa il primo lavoro e sbaglia il secondo. Correggilo.</p>
+
+      <div class="lab">
+        <div class="lab-bar">
+          <span>Correggi ed esegui</span>
+          <span class="lab-acts">
+            <button class="btn btn-run" data-run>Esegui ▸</button>
+            <button class="btn" data-reset>Ripristina</button>
+          </span>
+        </div>
+        <textarea spellcheck="false">const task = [
+  { id: 1, testo: "Studiare", fatto: false },
+  { id: 2, testo: "Allenarsi", fatto: false }
+]
+
+const aggiornati = task.map(t => {
+  if (t.id === 2) t.fatto = true
+  return t
+})
+
+console.log("originale:", task)</textarea>
+        <div class="lab-out"></div>
+      </div>
+
+      <div class="reveal">
+        <button class="reveal-btn">Aiuto</button>
+        <button class="reveal-btn">Soluzione</button>
+        <div class="reveal-body">
+          <p><code>map</code> crea un array nuovo, ma gli oggetti dentro sono ancora gli stessi. Quel <code>t.fatto = true</code> scrive dentro l'oggetto originale.</p>
+          <p>Ti serve un oggetto nuovo per l'elemento che cambi, e l'elemento originale per tutti gli altri.</p>
+        </div>
+        <div class="reveal-body">
+<pre><code>const aggiornati = task.map(t =&gt;
+  t.id === 2 ? { ...t, fatto: true } : t
+)
+
+console.log("originale:", task)        // fatto: false, intatto
+console.log("aggiornati:", aggiornati) // fatto: true sul secondo</code></pre>
+          <p>La differenza è tutta in <code>{ ...t, fatto: true }</code>: produce un oggetto nuovo invece di scrivere in quello vecchio.</p>
+        </div>
+      </div>
+
+      <h2>Tre · completa</h2>
+      <p>Completa le tre righe. Ogni riga deve produrre un array nuovo, senza toccare <code>lista</code>.</p>
+
+      <div class="lab">
+        <div class="lab-bar">
+          <span>Completa ed esegui</span>
+          <span class="lab-acts">
+            <button class="btn btn-run" data-run>Esegui ▸</button>
+            <button class="btn" data-reset>Ripristina</button>
+          </span>
+        </div>
+        <textarea spellcheck="false">const lista = [
+  { id: 1, nome: "Anna" },
+  { id: 2, nome: "Luca" }
+]
+
+const conNuovo =
+const senzaUno =
+const rinominato =
+
+console.log(conNuovo)
+console.log(senzaUno)
+console.log(rinominato)
+console.log("originale:", lista)</textarea>
+        <div class="lab-out"></div>
+      </div>
+
+      <div class="reveal">
+        <button class="reveal-btn">Aiuto</button>
+        <button class="reveal-btn">Soluzione</button>
+        <div class="reveal-body">
+          <p>Sono le tre formule della sezione 05, nell'ordine: spread, filter, map con ternario. Per il terzo, il nome nuovo scegli tu quale.</p>
+        </div>
+        <div class="reveal-body">
+<pre><code>const conNuovo = [...lista, { id: 3, nome: "Sara" }]
+const senzaUno = lista.filter(p =&gt; p.id !== 1)
+const rinominato = lista.map(p =&gt;
+  p.id === 2 ? { ...p, nome: "Luca R." } : p
+)</code></pre>
+        </div>
+      </div>
+
+      <div class="box note">
+        <div class="box-t">Se hai sbagliato la seconda</div>
+        <p>Rileggi il riquadro rosso della sezione 05 sul doppio livello. È l'errore più comune di tutta la settimana e ti seguirà fino a React se non lo chiarisci adesso.</p>
+      </div>
+    </section>
+
+    <!-- ============ 8 ============ -->
+    <section class="pane">
+      <div class="eyebrow">Sezione 08 · secondo giorno</div>
+      <h1>Officina · esercizi 5–7</h1>
+      <p class="lead">Gli ultimi tre. Il settimo usa tutte e tre le manipolazioni immutabili su un array di task: è il pezzo di codice che riscriverai in React.</p>
+
+      <!-- ES 5 -->
+      <div class="ex">
+        <div class="ex-h">
+          <span class="ex-n">Es 5</span>
+          <p class="ex-t">Unire due configurazioni</p>
+          <span class="ex-lvl">intermedio</span>
+        </div>
+        <p>Hai due oggetti: le impostazioni predefinite e quelle scelte dall'utente.</p>
+        <pre><code>const predefinite = { tema: "chiaro", lingua: "it", notifiche: true }
+const utente = { tema: "scuro" }</code></pre>
+        <p>Costruisci <code>finali</code> in modo che le scelte dell'utente vincano su quelle predefinite, e che le impostazioni non specificate dall'utente restino quelle di default.</p>
+        <p>Poi prova a invertire l'ordine dello spread e guarda cosa cambia.</p>
+
+        <div class="lab">
+          <div class="lab-bar">
+            <span>Il tuo codice</span>
+            <span class="lab-acts">
+              <button class="btn btn-run" data-run>Esegui ▸</button>
+              <button class="btn" data-reset>Ripristina</button>
+            </span>
+          </div>
+          <textarea spellcheck="false">const predefinite = { tema: "chiaro", lingua: "it", notifiche: true }
+const utente = { tema: "scuro" }
+
+</textarea>
+          <div class="lab-out"></div>
+        </div>
+
+        <div class="reveal">
+          <button class="reveal-btn">Aiuto</button>
+          <button class="reveal-btn">Soluzione</button>
+          <div class="reveal-body">
+            <p>Sulle proprietà in comune vince quella scritta più a destra. Decidi tu chi deve vincere e mettilo per ultimo.</p>
+          </div>
+          <div class="reveal-body">
+<pre><code>const finali = { ...predefinite, ...utente }
+console.log(finali)
+// { tema: "scuro", lingua: "it", notifiche: true }
+
+// invertendo l'ordine, il default sovrascrive la scelta
+const sbagliate = { ...utente, ...predefinite }
+console.log(sbagliate)
+// { tema: "chiaro", lingua: "it", notifiche: true }</code></pre>
+            <p>Nella versione sbagliata la scelta dell'utente sparisce senza nessun errore. È lo schema con cui ogni libreria gestisce le opzioni: prima i default, poi quello che arriva da fuori.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ES 6 -->
+      <div class="ex">
+        <div class="ex-h">
+          <span class="ex-n">Es 6</span>
+          <p class="ex-t">La copia che non copia</p>
+          <span class="ex-lvl">avanzato</span>
+        </div>
+        <p>Dato <code>const squadre = [["Anna", "Luca"], ["Sara", "Marco"]]</code>, aggiungi <code>"Gino"</code> alla prima squadra <strong>senza</strong> modificare <code>squadre</code>.</p>
+        <p>Prima prova con un solo spread e verifica che non basta. Poi scrivi la versione corretta.</p>
+
+        <div class="lab">
+          <div class="lab-bar">
+            <span>Il tuo codice</span>
+            <span class="lab-acts">
+              <button class="btn btn-run" data-run>Esegui ▸</button>
+              <button class="btn" data-reset>Ripristina</button>
+            </span>
+          </div>
+          <textarea spellcheck="false">const squadre = [["Anna", "Luca"], ["Sara", "Marco"]]
+
+// tentativo 1: un solo spread
+
+// tentativo 2: quello giusto
+
+</textarea>
+          <div class="lab-out"></div>
+        </div>
+
+        <div class="reveal">
+          <button class="reveal-btn">Aiuto</button>
+          <button class="reveal-btn">Soluzione</button>
+          <div class="reveal-body">
+            <p>Lo spread copia solo il primo livello. Se stai modificando un array che sta <em>dentro</em>, devi creare un array nuovo anche per quello.</p>
+            <p>Un modo pulito: usa <code>map</code> sull'array esterno e produci un array nuovo per la squadra che cambia.</p>
+          </div>
+          <div class="reveal-body">
+<pre><code>const squadre = [["Anna", "Luca"], ["Sara", "Marco"]]
+
+// TENTATIVO 1 — non funziona
+const copia = [...squadre]
+copia[0].push("Gino")
+console.log(squadre[0])   // ["Anna","Luca","Gino"] — rovinato!
+
+// TENTATIVO 2 — spread anche sul livello interno
+const originali = [["Anna", "Luca"], ["Sara", "Marco"]]
+const nuove = originali.map((sq, i) =&gt;
+  i === 0 ? [...sq, "Gino"] : sq
+)
+console.log(nuove[0])       // ["Anna","Luca","Gino"]
+console.log(originali[0])   // ["Anna","Luca"] — intatto</code></pre>
+            <p>È lo stesso schema della terza formula: <code>map</code> per l'array esterno, spread per l'elemento che cambia, l'elemento originale per tutti gli altri.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ES 7 -->
+      <div class="ex">
+        <div class="ex-h">
+          <span class="ex-n">Es 7</span>
+          <p class="ex-t">Il gestore di task</p>
+          <span class="ex-lvl">sfida</span>
+        </div>
+        <p>Scrivi tre funzioni che lavorano su un array di task. Nessuna delle tre deve modificare l'array che riceve: tutte restituiscono un array nuovo.</p>
+        <ul>
+          <li><code>aggiungi(lista, testo)</code> — aggiunge un task con <code>fatto: false</code> e un <code>id</code> che non collide con quelli esistenti</li>
+          <li><code>rimuovi(lista, id)</code> — toglie il task con quell'id</li>
+          <li><code>completa(lista, id)</code> — inverte <code>fatto</code> sul task con quell'id</li>
+        </ul>
+        <p>Provale in sequenza, partendo dalla lista iniziale, e alla fine stampa la lista originale per dimostrare che non è mai cambiata.</p>
+
+        <div class="lab">
+          <div class="lab-bar">
+            <span>Il tuo codice</span>
+            <span class="lab-acts">
+              <button class="btn btn-run" data-run>Esegui ▸</button>
+              <button class="btn" data-reset>Ripristina</button>
+            </span>
+          </div>
+          <textarea spellcheck="false">const iniziale = [
+  { id: 1, testo: "Studiare", fatto: false },
+  { id: 2, testo: "Allenarsi", fatto: false }
+]
+
+// aggiungi, rimuovi, completa
+
+
+// prova in sequenza
+
+</textarea>
+          <div class="lab-out"></div>
+        </div>
+
+        <div class="reveal">
+          <button class="reveal-btn">Aiuto</button>
+          <button class="reveal-btn">Soluzione</button>
+          <div class="reveal-body">
+            <p>Una formula per funzione, nell'ordine in cui le hai imparate: spread, filter, map con ternario.</p>
+            <p>Per l'id nuovo puoi usare la lunghezza della lista, ma è fragile: se hai rimosso un elemento rischi di riusare un id. Meglio calcolare il massimo degli id esistenti e aggiungere 1. Attenzione alla lista vuota.</p>
+            <p>Per invertire un booleano c'è il punto esclamativo: <code>!t.fatto</code>.</p>
+          </div>
+          <div class="reveal-body">
+<pre><code>const iniziale = [
+  { id: 1, testo: "Studiare", fatto: false },
+  { id: 2, testo: "Allenarsi", fatto: false }
+]
+
+// 1. AGGIUNGERE: spread piu' elemento nuovo in coda
+const aggiungi = (lista, testo) =&gt; {
+  const ids = lista.map(t =&gt; t.id)
+  // lista vuota: parto da 0, altrimenti il massimo esistente
+  const nuovoId = ids.length &gt; 0 ? Math.max(...ids) + 1 : 1
+  return [...lista, { id: nuovoId, testo: testo, fatto: false }]
+}
+
+// 2. RIMUOVERE: filter con il confronto diverso
+const rimuovi = (lista, id) =&gt; lista.filter(t =&gt; t.id !== id)
+
+// 3. MODIFICARE: map, ternario, spread sull'elemento giusto
+const completa = (lista, id) =&gt;
+  lista.map(t =&gt; t.id === id ? { ...t, fatto: !t.fatto } : t)
+
+// prova in sequenza: ogni passo parte dal risultato del precedente
+const p1 = aggiungi(iniziale, "Leggere")
+const p2 = completa(p1, 2)
+const p3 = rimuovi(p2, 1)
+
+console.log("dopo aggiungi:", p1.map(t =&gt; t.testo))
+console.log("dopo completa:", p2.map(t =&gt; t.testo + ":" + t.fatto))
+console.log("dopo rimuovi:", p3.map(t =&gt; t.testo))
+console.log("originale:", iniziale.map(t =&gt; t.testo + ":" + t.fatto))</code></pre>
+            <p>Nota <code>Math.max(...ids)</code>: lo spread che espande un array in argomenti separati, dalla sezione 03. E nota che <code>iniziale</code> alla fine è identico all'inizio, pur avendo fatto tre operazioni.</p>
+            <p>Queste tre funzioni sono, riga per riga, quello che scriverai dentro <code>setTask(...)</code> nella settimana 8.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="box tip">
+        <div class="box-t">Se hai finito tutto</div>
+        <p>Estendi l'esercizio 7 con una quarta funzione <code>rimuoviCompletati(lista)</code> che toglie in un colpo solo tutti i task con <code>fatto: true</code>. È sempre <code>filter</code>, con un predicato diverso.</p>
+        <p>Poi prova <code>ordina(lista)</code>, che restituisce la lista ordinata per testo senza modificare l'originale. Attenzione: <code>sort</code> modifica l'array su cui lo chiami. Ti serve una copia prima.</p>
+      </div>
+    </section>
+
+    <!-- ============ 9 ============ -->
+    <section class="pane">
+      <div class="eyebrow">Sezione 09</div>
+      <h1>Moduli <code>import</code> / <code>export</code></h1>
+      <p class="lead">Come si divide il codice in più file, e perché tutto quello che non dichiari pubblico resta chiuso dentro il suo file.</p>
+
+      <div class="box warn">
+        <div class="box-t">Questa sezione non si prova qui</div>
+        <p>I moduli funzionano solo tra file veri, caricati dal browser come moduli ES. La console di questa pagina esegue una stringa di codice isolata: non ha file attorno a sé, quindi <code>import</code> ed <code>export</code> danno errore di sintassi.</p>
+        <p>Per questo qui trovi solo blocchi di codice da leggere, senza pulsante Esegui. Li proverai per davvero quando creerai il progetto Vite: da quel momento in poi li userai in ogni file.</p>
+      </div>
+
+      <h2>Il problema</h2>
+      <p>Un'applicazione seria non sta in un file solo. Serve dividerla: un file per l'accesso ai dati, uno per il disegno dell'interfaccia, uno che coordina. Il libro lo chiama <strong>refactoring modulare</strong> e lo applica a un progetto reale nella sezione 9.6.</p>
+      <p>Ma se dividi in file, serve un modo perché un file usi le funzioni di un altro. Quel modo sono i <strong>moduli ES6</strong> (cap. 9.1, p. 268).</p>
+
+      <h2>Le due parole</h2>
+      <div class="tbl-scroll">
+      <table>
+        <tr><th style="width:24%">Parola</th><th>Che cosa fa</th></tr>
+        <tr><td><code>export</code></td><td>Rende una cosa disponibile all'esterno del file</td></tr>
+        <tr><td><code>import</code></td><td>Preleva da un altro file una cosa che è stata esportata</td></tr>
+      </table>
+      </div>
+
+      <h2>Export con nome</h2>
+      <p>La forma più comune. Metti <code>export</code> davanti a ciò che vuoi rendere pubblico.</p>
+
+      <pre><code>// file: utils.js
+
+export const IVA = 22
+
+export const conIva = prezzo =&gt; prezzo * (1 + IVA / 100)
+
+// questa non ha export: resta privata a utils.js
+const arrotonda = n =&gt; Math.round(n * 100) / 100</code></pre>
+
+      <p>E dall'altra parte:</p>
+
+      <pre><code>// file: main.js
+
+import { conIva, IVA } from "./utils.js"
+
+console.log(IVA)            // 22
+console.log(conIva(100))    // 122
+
+console.log(arrotonda(1.5)) // ReferenceError: non esiste qui</code></pre>
+
+      <div class="box note">
+        <div class="box-t">Le graffe non sono destructuring</div>
+        <p>Le graffe di <code>import { conIva }</code> assomigliano al destructuring di oggetti della sezione 02, ma sono un'altra cosa: fanno parte della sintassi dei moduli. L'effetto pratico è simile — scegli per nome cosa prendere — quindi la somiglianza aiuta a ricordarla.</p>
+        <p>Il percorso vuole l'estensione e il <code>./</code> davanti: <code>"./utils.js"</code>, non <code>"utils"</code>.</p>
+      </div>
+
+      <h2>Perché una variabile senza <code>export</code> resta privata</h2>
+      <p>Il libro insiste su questo punto (p. 268). Non è una limitazione, è una scelta di progetto.</p>
+
+      <ul>
+        <li><strong>Niente conflitti di nomi.</strong> Ogni file ha il suo spazio. Puoi avere una funzione <code>formatta</code> in tre file diversi senza che si pestino i piedi. Prima dei moduli, tutto finiva in un unico spazio globale e i conflitti erano all'ordine del giorno.</li>
+        <li><strong>Least privilege.</strong> Esponi solo il minimo necessario. Chi usa il tuo modulo vede l'interfaccia pubblica, non gli ingranaggi. Se domani cambi come funziona <code>arrotonda</code>, nessun altro file si rompe: nessuno poteva usarla.</li>
+      </ul>
+
+      <div class="box tip">
+        <div class="box-t">Least privilege</div>
+        <p>È lo stesso principio che hai incontrato in sicurezza: dai a ogni parte del sistema solo i permessi che le servono, non uno di più. Qui la "parte del sistema" è un file, e il permesso è la visibilità di una funzione.</p>
+      </div>
+
+      <h2>Export default</h2>
+      <p>Un file può esportare una cosa principale senza nome vincolante. In import la scegli tu, e non servono le graffe.</p>
+
+      <pre><code>// file: Card.js
+export default function Card({ titolo }) {
+  return "..."
+}
+
+// file: main.js
+import Card from "./Card.js"          // nome libero, niente graffe
+import PocketBase from "pocketbase"   // libreria: senza ./ e senza .js</code></pre>
+
+      <p>L'ultima riga viene dal libro (cap. 9.5): quando importi una libreria installata con <code>npm</code> scrivi solo il nome, senza percorso e senza estensione. Il bundler sa dove trovarla dentro <code>node_modules</code>.</p>
+
+      <h2>Le due forme a confronto</h2>
+      <div class="tbl-scroll">
+      <table>
+        <tr><th style="width:30%"></th><th style="width:34%">Export con nome</th><th>Export default</th></tr>
+        <tr><td>Quanti per file</td><td>Quanti vuoi</td><td>Al massimo uno</td></tr>
+        <tr><td>Si scrive</td><td><code>export const f = ...</code></td><td><code>export default f</code></td></tr>
+        <tr><td>Si importa</td><td><code>import { f } from "./m.js"</code></td><td><code>import f from "./m.js"</code></td></tr>
+        <tr><td>Il nome</td><td>Deve coincidere</td><td>Lo scegli tu</td></tr>
+      </table>
+      </div>
+
+      <h2>Come si divide un progetto</h2>
+      <p>Il libro propone questa suddivisione per l'applicazione del capitolo 9 (sezione 9.6), applicando il principio di <strong>singola responsabilità</strong>: ogni file fa una cosa sola.</p>
+
+      <div class="tbl-scroll">
+      <table>
+        <tr><th style="width:26%">File</th><th>Responsabilità</th></tr>
+        <tr><td><code>src/api.js</code></td><td>Accesso ai dati: connessione e operazioni di lettura e scrittura</td></tr>
+        <tr><td><code>src/map.js</code></td><td>La mappa</td></tr>
+        <tr><td><code>src/ui.js</code></td><td>DOM e template: tutto ciò che si vede</td></tr>
+        <tr><td><code>main.js</code></td><td>Il direttore d'orchestra: importa gli altri e li coordina</td></tr>
+      </table>
+      </div>
+
+      <div class="box note">
+        <div class="box-t">Il file HTML deve saperlo</div>
+        <p>Perché il browser tratti un file come modulo serve l'attributo <code>type="module"</code> sul tag script:</p>
+        <pre><code>&lt;script type="module" src="/main.js"&gt;&lt;/script&gt;</code></pre>
+        <p>Senza, <code>import</code> dà errore. Con Vite lo trovi già scritto nel progetto appena creato, quindi non è qualcosa che dovrai ricordarti ogni volta.</p>
+      </div>
+    </section>
+
+    <!-- ============ 10 ============ -->
+    <section class="pane">
+      <div class="eyebrow">Sezione 10</div>
+      <h1>Controlla di aver capito</h1>
+      <p class="lead">Prima la lista di quello che devi saper fare, poi dieci domande per verificarlo. Rispondi senza guardare indietro: serve a te, non a nessun altro.</p>
+
+      <h2>So fare</h2>
+      <p>Spunta solo le voci per cui sapresti scrivere il codice adesso, senza consultare la pagina.</p>
+
+      <ul class="check">
+        <li><span class="check-mark"></span><span>So estrarre valori da un array con il destructuring, saltando elementi e raccogliendo il resto</span></li>
+        <li><span class="check-mark"></span><span>So destrutturare un oggetto e dare un valore di default a una proprietà che potrebbe mancare</span></li>
+        <li><span class="check-mark"></span><span>So scrivere il destructuring nei parametri di una funzione, come <code>function Card({ titolo })</code></span></li>
+        <li><span class="check-mark"></span><span>So concatenare, clonare e unire con lo spread, e so chi vince nell'unione</span></li>
+        <li><span class="check-mark"></span><span>So spiegare perché <code>const</code> non impedisce <code>lista.push(...)</code></span></li>
+        <li><span class="check-mark"></span><span>So riconoscere un caso in cui lo spread non basta perché è una copia superficiale</span></li>
+        <li><span class="check-mark"></span><span>So scrivere a memoria le tre manipolazioni immutabili</span></li>
+        <li><span class="check-mark"></span><span>So dire perché <code>push</code>, <code>splice</code> e l'assegnazione diretta sono da evitare</span></li>
+        <li><span class="check-mark"></span><span>So dividere il codice in moduli con <code>import</code> ed <code>export</code></span></li>
+        <li><span class="check-mark"></span><span>So spiegare cosa succede a una variabile senza <code>export</code> e perché è un vantaggio</span></li>
+      </ul>
+
+      <div class="box note">
+        <div class="box-t">Se una casella è rimasta vuota</div>
+        <p>Torna alla sezione corrispondente e rifai gli esempi nel riquadro di esecuzione. La settima voce è quella che non puoi lasciare in bianco: senza le tre formule, la settimana 8 diventa impraticabile.</p>
+      </div>
+
+      <h2>Dieci domande</h2>
+
+      <div class="q" data-a="2">
+        <p class="q-t">Che cosa vale <code>c</code> dopo <code>const [a, , c] = [10, 20, 30, 40]</code>?</p>
+        <div class="opts">
+          <button class="opt">20</button>
+          <button class="opt">undefined</button>
+          <button class="opt">30</button>
+          <button class="opt">40</button>
+        </div>
+        <div class="fb"></div>
+        <div class="fb-txt" hidden>La virgola vuota consuma la seconda posizione senza assegnarla a nessuna variabile. Quindi <code>a</code> prende 10, la posizione di 20 viene saltata e <code>c</code> prende 30. Il 40 avanza e viene ignorato.</div>
+      </div>
+
+      <div class="q" data-a="0">
+        <p class="q-t">Dato <code>const obj = { nome: "Anna" }</code>, che cosa stampa <code>const { cognome } = obj; console.log(cognome)</code>?</p>
+        <div class="opts">
+          <button class="opt">undefined</button>
+          <button class="opt">null</button>
+          <button class="opt">Una stringa vuota</button>
+          <button class="opt">ReferenceError: cognome is not defined</button>
+        </div>
+        <div class="fb"></div>
+        <div class="fb-txt" hidden>Il destructuring di oggetti va per nome: se la proprietà non esiste, la variabile viene creata comunque e vale <code>undefined</code>. Non ottieni nessun errore, ed è proprio questo che rende insidioso sbagliare una lettera nel nome.</div>
+      </div>
+
+      <div class="q" data-a="3">
+        <p class="q-t">Che cosa contiene <code>{ ...{ a: 1, b: 2 }, ...{ b: 99 } }</code>?</p>
+        <div class="opts">
+          <button class="opt">{ a: 1, b: 2 }</button>
+          <button class="opt">{ a: 1, b: 2, b: 99 }</button>
+          <button class="opt">Un errore: la proprietà b è duplicata</button>
+          <button class="opt">{ a: 1, b: 99 }</button>
+        </div>
+        <div class="fb"></div>
+        <div class="fb-txt" hidden>Sulle proprietà in comune vince l'ultima scritta, cioè quella più a destra. Un oggetto non può avere due volte la stessa chiave, quindi <code>b</code> finisce a 99. È lo schema con cui si sovrascrive un valore predefinito.</div>
+      </div>
+
+      <div class="q" data-a="1">
+        <p class="q-t">Perché <code>const lista = [1, 2]; lista.push(3)</code> non genera errore?</p>
+        <div class="opts">
+          <button class="opt">Perché <code>push</code> è un metodo speciale che aggira <code>const</code></button>
+          <button class="opt">Perché <code>const</code> blocca il riferimento, non il contenuto a cui punta</button>
+          <button class="opt">Perché gli array in JavaScript sono sempre modificabili, anche riassegnandoli</button>
+          <button class="opt">Perché <code>push</code> restituisce un array nuovo</button>
+        </div>
+        <div class="fb"></div>
+        <div class="fb-txt" hidden>La variabile contiene un indirizzo, non l'array. <code>const</code> vieta di cambiare quell'indirizzo, cioè di scrivere <code>lista = [...]</code>. Il contenuto all'indirizzo resta modificabile. E no, <code>push</code> non restituisce un array nuovo: restituisce la nuova lunghezza.</div>
+      </div>
+
+      <div class="q" data-a="2">
+        <p class="q-t">Dopo <code>const b = [...a]</code> con <code>a = [[1, 2], 3]</code>, che effetto ha <code>b[0].push(9)</code>?</p>
+        <div class="opts">
+          <button class="opt">Modifica solo <code>b</code>: lo spread ha creato una copia completa</button>
+          <button class="opt">Genera un errore, perché <code>b[0]</code> è di sola lettura</button>
+          <button class="opt">Modifica anche <code>a</code>, perché l'array interno è condiviso</button>
+          <button class="opt">Non modifica niente: <code>push</code> su una copia non ha effetto</button>
+        </div>
+        <div class="fb"></div>
+        <div class="fb-txt" hidden>Lo spread è una copia <strong>superficiale</strong>: duplica solo il primo livello. Nella prima casella di <code>b</code> è finito l'indirizzo dello stesso array interno che sta in <code>a</code>. Modificandolo da una parte lo vedi cambiato anche dall'altra. Per copiare tutti i livelli serve uno spread per livello o <code>structuredClone</code>.</div>
+      </div>
+
+      <div class="q" data-a="0">
+        <p class="q-t">Come rimuovi in modo immutabile l'elemento con <code>id === 5</code> da <code>lista</code>?</p>
+        <div class="opts">
+          <button class="opt"><code>lista.filter(x =&gt; x.id !== 5)</code></button>
+          <button class="opt"><code>lista.filter(x =&gt; x.id === 5)</code></button>
+          <button class="opt"><code>lista.splice(5, 1)</code></button>
+          <button class="opt"><code>lista.map(x =&gt; x.id !== 5)</code></button>
+        </div>
+        <div class="fb"></div>
+        <div class="fb-txt" hidden><code>filter</code> tiene gli elementi per cui il predicato è vero, quindi serve il confronto <em>diverso</em>. Con <code>===</code> terresti solo l'elemento da togliere. <code>splice</code> modifica l'array esistente. <code>map</code> non elimina niente: restituirebbe un array di <code>true</code> e <code>false</code> lungo uguale.</div>
+      </div>
+
+      <div class="q" data-a="1">
+        <p class="q-t">In <code>lista.map(x =&gt; x.id === id ? {...x, fatto: true} : x)</code>, a cosa serve la <code>x</code> dopo i due punti?</p>
+        <div class="opts">
+          <button class="opt">A niente: si può togliere</button>
+          <button class="opt">A restituire invariati gli elementi che non devono cambiare</button>
+          <button class="opt">A creare una copia di ogni elemento della lista</button>
+          <button class="opt">A interrompere <code>map</code> quando trova l'elemento giusto</button>
+        </div>
+        <div class="fb"></div>
+        <div class="fb-txt" hidden><code>map</code> costruisce il nuovo array con ciò che la funzione restituisce a ogni giro. Per gli elementi che non ti interessano devi restituire l'elemento stesso, altrimenti al loro posto finisce <code>undefined</code> e la lista si riempie di buchi. E no, <code>map</code> non si interrompe mai: scorre sempre tutto.</div>
+      </div>
+
+      <div class="q" data-a="3">
+        <p class="q-t">Perché in React <code>lista.push(nuovo)</code> spesso non aggiorna la schermata?</p>
+        <div class="opts">
+          <button class="opt">Perché <code>push</code> non aggiunge davvero l'elemento</button>
+          <button class="opt">Perché <code>push</code> è più lento del rendering</button>
+          <button class="opt">Perché <code>push</code> genera un errore che blocca il disegno</button>
+          <button class="opt">Perché l'array resta lo stesso oggetto e il confronto non rileva cambiamenti</button>
+        </div>
+        <div class="fb"></div>
+        <div class="fb-txt" hidden>L'elemento entra davvero nell'array, e non c'è nessun errore. Ma React confronta il vecchio valore con il nuovo guardando l'identità dell'oggetto, non il contenuto: <code>vecchio === nuovo</code> dà <code>true</code> e il ridisegno non parte. Serve un array nuovo, cioè <code>[...lista, nuovo]</code>.</div>
+      </div>
+
+      <div class="q" data-a="2">
+        <p class="q-t">In un modulo ES6, cosa succede a una funzione dichiarata senza <code>export</code>?</p>
+        <div class="opts">
+          <button class="opt">È visibile a tutti i file del progetto</button>
+          <button class="opt">Genera un errore al caricamento del modulo</button>
+          <button class="opt">Resta privata al modulo: nessun altro file può importarla</button>
+          <button class="opt">Viene esportata comunque, ma solo come <code>default</code></button>
+        </div>
+        <div class="fb"></div>
+        <div class="fb-txt" hidden>Ogni modulo ha il suo spazio dei nomi: fuori esce solo ciò che dichiari con <code>export</code> (cap. 9.1, p. 268). Il vantaggio è doppio: nessun conflitto tra nomi uguali in file diversi, e applicazione del principio di <em>least privilege</em>, cioè esporre il minimo necessario.</div>
+      </div>
+
+      <div class="q" data-a="1">
+        <p class="q-t">Qual è la sintassi corretta per importare la funzione <code>conIva</code> esportata con nome da <code>utils.js</code>?</p>
+        <div class="opts">
+          <button class="opt"><code>import conIva from "./utils.js"</code></button>
+          <button class="opt"><code>import { conIva } from "./utils.js"</code></button>
+          <button class="opt"><code>import { conIva } from "utils"</code></button>
+          <button class="opt"><code>export { conIva } from "./utils.js"</code></button>
+        </div>
+        <div class="fb"></div>
+        <div class="fb-txt" hidden>Gli export con nome si importano fra graffe e con il nome esatto. Senza graffe importeresti l'export <code>default</code>, che qui non c'è. Il percorso di un file tuo vuole il <code>./</code> e l'estensione: la forma senza percorso è riservata alle librerie installate con npm, come <code>import PocketBase from "pocketbase"</code>.</div>
+      </div>
+
+      <div class="score" id="score">Risposte corrette: 0 / 10</div>
+
+      <h2>La prossima settimana</h2>
+      <p>Si passa dal codice che gira nella console al codice che gira in un progetto vero: <code>npm create vite</code>, la struttura delle cartelle, il server di sviluppo. Da lì in poi i moduli della sezione 09 smettono di essere teoria.</p>
+      <p>Le tre formule di oggi, invece, non ti lasciano più: le rivedrai nella settimana 8 dentro <code>useState</code>, scritte identiche.</p>
+    </section>
+
+  </main>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ---------- NAVIGAZIONE ---------- */
+  var navBtns = document.querySelectorAll(".rail-btn");
+  var panes = document.querySelectorAll(".pane");
+
+  navBtns.forEach(function (b) {
+    b.addEventListener("click", function () {
+      var i = parseInt(b.getAttribute("data-p"), 10);
+      navBtns.forEach(function (x) { x.classList.remove("on"); });
+      panes.forEach(function (x) { x.classList.remove("on"); });
+      b.classList.add("on");
+      if (panes[i]) panes[i].classList.add("on");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+  });
+
+  /* ---------- TEMA ---------- */
+  var tog = document.getElementById("themeTog");
+  tog.addEventListener("click", function () {
+    var cur = document.documentElement.getAttribute("data-theme");
+    var dark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    var next;
+    if (cur === "dark") next = "light";
+    else if (cur === "light") next = "dark";
+    else next = dark ? "light" : "dark";
+    document.documentElement.setAttribute("data-theme", next);
+  });
+
+  /* ---------- CONSOLE INTEGRATA ---------- */
+  function format(v, depth) {
+    depth = depth || 0;
+    if (v === null) return "null";
+    if (v === undefined) return "undefined";
+    var t = typeof v;
+    if (t === "string") return depth === 0 ? v : '"' + v + '"';
+    if (t === "number" || t === "boolean") return String(v);
+    if (t === "function") return v.name ? "ƒ " + v.name + "()" : "ƒ ()";
+    if (t === "symbol" || t === "bigint") return String(v);
+    if (Array.isArray(v)) {
+      if (depth > 3) return "[…]";
+      return "[ " + v.map(function (x) { return format(x, depth + 1); }).join(", ") + " ]";
+    }
+    if (v instanceof Error) return v.name + ": " + v.message;
+    if (t === "object") {
+      if (depth > 3) return "{…}";
+      var keys = Object.keys(v);
+      if (keys.length === 0) return "{}";
+      return "{ " + keys.map(function (k) {
+        return k + ": " + format(v[k], depth + 1);
+      }).join(", ") + " }";
+    }
+    return String(v);
+  }
+
+  document.querySelectorAll(".lab").forEach(function (lab) {
+    var ta = lab.querySelector("textarea");
+    var out = lab.querySelector(".lab-out");
+    var runBtn = lab.querySelector("[data-run]");
+    var resetBtn = lab.querySelector("[data-reset]");
+    var original = ta.value;
+
+    function write(text, isErr) {
+      var line = document.createElement("span");
+      line.className = "ln" + (isErr ? " err" : "");
+      line.textContent = text;
+      out.appendChild(line);
+    }
+
+    function run() {
+      out.textContent = "";
+      var realLog = console.log;
+      var realWarn = console.warn;
+      var realError = console.error;
+      var captured = false;
+
+      function capture(isErr) {
+        return function () {
+          captured = true;
+          var parts = [];
+          for (var i = 0; i < arguments.length; i++) {
+            parts.push(format(arguments[i], 0));
+          }
+          write(parts.join(" "), isErr);
+        };
+      }
+
+      console.log = capture(false);
+      console.warn = capture(false);
+      console.error = capture(true);
+
+      try {
+        // eslint-disable-next-line no-new-func
+        var fn = new Function('"use strict";\n' + ta.value);
+        fn();
+        if (!captured) {
+          write("(nessun output: usa console.log per stampare)", false);
+        }
+      } catch (e) {
+        write(e.name + ": " + e.message, true);
+      } finally {
+        console.log = realLog;
+        console.warn = realWarn;
+        console.error = realError;
+      }
+    }
+
+    runBtn.addEventListener("click", run);
+
+    if (resetBtn) {
+      resetBtn.addEventListener("click", function () {
+        ta.value = original;
+        out.textContent = "";
+      });
+    }
+
+    // Ctrl+Invio esegue, Tab inserisce due spazi
+    ta.addEventListener("keydown", function (e) {
+      if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
+        e.preventDefault();
+        run();
+        return;
+      }
+      if (e.key === "Tab") {
+        e.preventDefault();
+        var s = ta.selectionStart;
+        var en = ta.selectionEnd;
+        ta.value = ta.value.substring(0, s) + "  " + ta.value.substring(en);
+        ta.selectionStart = ta.selectionEnd = s + 2;
+      }
+    });
+  });
+
+  /* ---------- AIUTO E SOLUZIONE ---------- */
+  document.querySelectorAll(".reveal").forEach(function (r) {
+    var btns = r.querySelectorAll(".reveal-btn");
+    var bodies = r.querySelectorAll(".reveal-body");
+    btns.forEach(function (b, i) {
+      b.addEventListener("click", function () {
+        if (!bodies[i]) return;
+        var open = bodies[i].classList.toggle("open");
+        b.textContent = (open ? "Nascondi " : "") + (i === 0 ? "Aiuto" : "Soluzione");
+      });
+    });
+  });
+
+  /* ---------- CHECKLIST ---------- */
+  document.querySelectorAll(".check li").forEach(function (li) {
+    li.addEventListener("click", function () {
+      li.classList.toggle("done");
+    });
+  });
+
+  /* ---------- QUIZ ---------- */
+  var right = 0;
+  var scoreBox = document.getElementById("score");
+  var totalQ = document.querySelectorAll(".q").length;
+
+  document.querySelectorAll(".q").forEach(function (q) {
+    var correct = parseInt(q.getAttribute("data-a"), 10);
+    var opts = q.querySelectorAll(".opt");
+    var fb = q.querySelector(".fb");
+    var fbTxt = q.querySelector(".fb-txt");
+
+    opts.forEach(function (o, i) {
+      o.addEventListener("click", function () {
+        if (q.dataset.done) return;
+        q.dataset.done = "1";
+        opts.forEach(function (x) { x.disabled = true; });
+        opts[correct].classList.add("right");
+        if (i !== correct) o.classList.add("wrong");
+        else right++;
+        if (fb && fbTxt) {
+          fb.innerHTML = fbTxt.innerHTML;
+          fb.classList.add("show");
+        }
+        if (scoreBox) {
+          scoreBox.textContent = "Risposte corrette: " + right + " / " + totalQ;
+        }
+      });
+    });
+  });
+})();
+</script>
+
+</body>
+</html>
