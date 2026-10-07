@@ -1,0 +1,62 @@
+Es 1
+const num = [10, 20, 30, 40, 50]
+
+const [primo, , terzo] = num
+console.log(primo, terzo)
+
+const [testa, ...coda] = num
+console.log(testa)
+console.log(coda)
+
+const [a, b, c, d, e, f = 0] = num
+console.log(a, b, c, d, e, f)
+
+Es 2 
+const studente = { nome: "Mario", cognome: "Rossi", eta: 18 }
+const anonimo = { nome: "Anna", cognome: "Bianchi" }
+
+function scheda({ nome, cognome, eta = "età non nota" }) {
+  return `${nome} ${cognome}, ${eta} anni`
+}
+
+const persona1 = { nome: "Mario", cognome: "Rossi", eta: 18 }
+console.log(scheda(persona1))
+const persona2 = { nome: "Mario", cognome: "Rossi" }
+console.log(scheda(persona2))
+
+Es 3
+const frutti = ["mela", "banana", "arancia"]
+
+const altriFrutti = [...frutti, "pera"]
+
+const conKiwi = ["kiwi", ...frutti]
+
+console.log(altriFrutti)
+console.log(conKiwi)
+console.log(frutti)
+
+Es 4
+const utente = { nome: "Anna", ruolo: "studente", attivo: false }
+
+function attiva(u) {
+  return { ...u, attivo: true }
+}
+
+const nuovo = attiva(utente)
+
+console.log("originale:", utente.attivo)
+console.log("nuovo:", nuovo.attivo)
+console.log("uguali?", utente === nuovo)
+
+Es riscaldamento 
+const a = [1, 2]
+const b = a //vine copiato l'indirizzamento fisico dell'array
+const c = [...a]
+
+b.push(3)
+
+console.log(a)        // [1, 2, 3] — b e a sono lo stesso array
+console.log(c)        // [1, 2]    — copia fatta prima del push
+console.log(a === b)  // true      — stesso indirizzo
+console.log(a === c)  // false     — array diverso
+ 
